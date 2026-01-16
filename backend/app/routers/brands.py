@@ -12,6 +12,15 @@ router = APIRouter()
 def get_service(session: Session = Depends(get_session)) -> BrandService:
     return BrandService(session)
 
+@router.get("/", response_model=list[BrandRead])
+def read_brands(
+    search: str | None = None,
+    limit: int = 100,
+    offset: int = 0,
+    service: BrandService = Depends(get_service)
+):
+    return service.get_all(search=search, limit=limit, offset=offset)
+
 @router.get("/random", response_model=list[BrandRead])
 def get_random_pair(service: BrandService = Depends(get_service)):
     return service.get_random_pair()
@@ -29,7 +38,6 @@ def get_brand(
     brand_id: uuid.UUID, 
     service: BrandService = Depends(get_service)
 ):
-    
     return service.get_by_id(brand_id)
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=StandardResponse)

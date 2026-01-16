@@ -1,4 +1,4 @@
-from sqlmodel import Session, select
+from sqlmodel import Session, select, col
 from fastapi import HTTPException
 import uuid
 
@@ -56,3 +56,14 @@ class BrandService:
         """
         statement = select(Brand).order_by(Brand.elo.desc()).offset(offset).limit(limit)
         return self.session.exec(statement).all()
+
+    def get_all(self, search: str | None = None, limit: int = 100, offset: int = 0) -> list[Brand]:
+        """
+        Returns all brands, optionally filtered by name (case-insensitive).
+        """
+        statement = select(Brand)
+        
+        if search:
+            statement = statement.where(col(Brand.name).ilike(f"%{search}%"))
+            
+        return self.session.exec(statement.offset(offset).limit(limit)).all()
