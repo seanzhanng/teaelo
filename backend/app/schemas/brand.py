@@ -24,7 +24,3 @@ class BrandRead(BrandBase):
     
     class Config:
         from_attributes = True
-
-class StandardResponse(BaseModel):
-    ok: bool = True
-    message: str = "Success"

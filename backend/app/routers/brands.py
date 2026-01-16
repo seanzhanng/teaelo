@@ -4,7 +4,8 @@ import uuid
 
 from app.db.session import get_session
 from app.services.brand_service import BrandService
-from app.schemas.brand import BrandCreate, BrandRead, BrandUpdate, StandardResponse
+from app.schemas.brand import BrandCreate, BrandRead, BrandUpdate
+from app.schemas.response import StandardResponse
 
 router = APIRouter()
 
