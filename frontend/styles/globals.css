@@ -33,3 +33,37 @@ body {
   font-family: var(--font-fredoka), sans-serif;
 }
 
+@keyframes waveMarqueeLeft {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes waveMarqueeRight {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.wave-track {
+  display: flex;
+  width: 200vw;
+  height: 100%;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.wave-track--left {
+  animation: waveMarqueeLeft 20s linear infinite;
+}
+
+.wave-track--right {
+  animation: waveMarqueeRight 25s linear infinite;
+}
+
