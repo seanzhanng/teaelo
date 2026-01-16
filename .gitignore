@@ -1,0 +1,131 @@
+####################################
+# PYTHON (FastAPI, Data Pipeline)
+####################################
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.coverage
+.coverage.*
+.hypothesis/
+.tox/
+.nox/
+.pybuilder/
+target/
+htmlcov/
+.dmypy.json
+.pyre/
+.pytype/
+.mypy_cache/
+.pytest_cache/
+.env
+.env.*
+venv/
+.venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+instance/
+.webassets-cache
+db.sqlite3
+__pypackages__/
+
+####################################
+# TYPESCRIPT / REACT (Frontend)
+####################################
+# Dependencies
+node_modules/
+# Build outputs
+.next/
+out/
+build/
+dist/
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+# Environment
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+# Misc
+*.tsbuildinfo
+*.log
+*.lock
+.DS_Store
+
+####################################
+# C++ / Analytics Engine
+####################################
+build/
+bin/
+obj/
+*.out
+*.o
+*.a
+*.so
+*.exe
+*.dll
+CMakeCache.txt
+CMakeFiles/
+cmake-build-*/
+*.cmake
+Makefile
+compile_commands.json
+
+####################################
+# DOCKER / INFRA
+####################################
+# Docker
+Dockerfile*
+docker-compose*.yml
+# Docker artifacts
+**/tmp/
+**/.docker/
+**/docker-cache/
+# Ignore volumes if mounted locally
+volumes/
+db_data/
+kafka_data/
+zookeeper_data/
+
+####################################
+# IDE / EDITOR CONFIGS
+####################################
+.vscode/
+.idea/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+####################################
+# SYSTEM / META
+####################################
+.DS_Store
+Thumbs.db
+desktop.ini
+
+####################################
+# MISC TOOLS
+####################################
+.ruff_cache/
+.cursorignore
+.cursorindexingignore
+.pdm-python
+.pixi
+marimo/_static/
+marimo/_lsp/
+__marimo__/
