@@ -12,6 +12,18 @@ router = APIRouter()
 def get_service(session: Session = Depends(get_session)) -> BrandService:
     return BrandService(session)
 
+@router.get("/random", response_model=list[BrandRead])
+def get_random_pair(service: BrandService = Depends(get_service)):
+    return service.get_random_pair()
+
+@router.get("/leaderboard", response_model=list[BrandRead])
+def get_leaderboard(
+    limit: int = 50, 
+    offset: int = 0, 
+    service: BrandService = Depends(get_service)
+):
+    return service.get_leaderboard(limit, offset)
+
 @router.get("/{brand_id}", response_model=BrandRead)
 def get_brand(
     brand_id: uuid.UUID, 

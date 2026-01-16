@@ -5,6 +5,8 @@ import uuid
 from app.models.brand import Brand
 from app.schemas.brand import BrandCreate, BrandUpdate
 
+from sqlalchemy.sql.expression import func
+
 class BrandService:
     def __init__(self, session: Session):
         self.session = session
@@ -36,3 +38,21 @@ class BrandService:
         brand = self.get_by_id(brand_id)
         self.session.delete(brand)
         self.session.commit()
+    
+    def get_random_pair(self) -> list[Brand]:
+        """
+        Returns 2 random brands for a face-off.
+        """
+        brands = self.session.exec(select(Brand).order_by(func.random()).limit(2)).all()
+        
+        if len(brands) < 2:
+            raise HTTPException(status_code=400, detail="Not enough brands to form a pair")
+            
+        return brands
+    
+    def get_leaderboard(self, limit: int = 50, offset: int = 0) -> list[Brand]:
+        """
+        Returns brands sorted by ELO (descending).
+        """
+        statement = select(Brand).order_by(Brand.elo.desc()).offset(offset).limit(limit)
+        return self.session.exec(statement).all()

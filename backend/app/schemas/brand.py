@@ -4,7 +4,6 @@ import uuid
 
 class BrandBase(BaseModel):
     name: str
-    slug: str
     website: str | None = None
     regions_present: list[str] = []
 
