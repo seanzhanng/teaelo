@@ -1,2 +1,2 @@
 from sqlmodel import SQLModel
-from app.models.test_item import TestItem
+from app.models.brand import Brand
