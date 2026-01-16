@@ -1,7 +1,3 @@
-# app/core/elo.py
-
-# K-FACTOR: Determines how volatile the ranking is. 
-# 32 is standard for chess. Higher = wilder swings.
 K_FACTOR = 32
 
 def calculate_expected_score(rating_a: int, rating_b: int) -> float:
@@ -26,3 +22,16 @@ def calculate_new_ratings(winner_elo: int, loser_elo: int) -> tuple[int, int]:
     new_loser_elo = loser_elo + K_FACTOR * (0 - expected_loss)
 
     return round(new_winner_elo), round(new_loser_elo)
+
+def get_tier_from_elo(elo: int) -> str:
+    """
+    Returns the Rank Tier based on ELO score.
+    """
+    if elo >= 1300:
+        return "S"
+    elif elo >= 1200:
+        return "A"
+    elif elo >= 1100:
+        return "B"
+    else:
+        return "C"
