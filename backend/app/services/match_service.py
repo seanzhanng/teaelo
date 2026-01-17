@@ -3,6 +3,7 @@ from fastapi import HTTPException
 import uuid
 
 from app.models.brand import Brand
+from app.models.match import Match
 from app.core.elo import calculate_new_ratings, get_tier_from_elo 
 from app.schemas.match import MatchCreate, MatchResult
 
@@ -21,9 +22,20 @@ class MatchService:
             raise HTTPException(status_code=400, detail="A brand cannot fight itself")
 
         new_winner_elo, new_loser_elo = calculate_new_ratings(winner.elo, loser.elo)
-
         winner_diff = new_winner_elo - winner.elo
         loser_diff = new_loser_elo - loser.elo
+
+        match_history = Match(
+            winner_id=winner.id,
+            loser_id=loser.id,
+            winner_elo_before=winner.elo,
+            winner_elo_after=new_winner_elo,
+            loser_elo_before=loser.elo,
+            loser_elo_after=new_loser_elo,
+            location_country=match_data.user_country,
+            location_city=match_data.user_city
+        )
+        self.session.add(match_history)
 
         winner.elo = new_winner_elo
         winner.wins += 1
@@ -33,15 +45,10 @@ class MatchService:
         loser.losses += 1
         loser.tier = get_tier_from_elo(new_loser_elo)
 
-        # 5. Save everything (Transactional)
         self.session.add(winner)
         self.session.add(loser)
         self.session.commit()
         
-        self.session.refresh(winner)
-        self.session.refresh(loser)
-
-        # 6. Return the detailed result
         return MatchResult(
             winner_id=winner.id,
             winner_new_elo=winner.elo,

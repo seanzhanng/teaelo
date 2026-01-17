@@ -16,6 +16,7 @@ class Brand(SQLModel, table=True):
     price_category: int | None = Field(default=None, description="1 to 4 scale")
     total_locations: int | None = 0
     regions_present: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    countries_active: List[str] = Field(default_factory=list, sa_column=Column(JSON))
     elo: int = Field(default=1200, index=True)
     tier: str = Field(default="Unranked")
     rank: int | None = None

@@ -1,11 +1,10 @@
 from sqlmodel import Session, select, col
 from fastapi import HTTPException
 import uuid
+from sqlalchemy.sql.expression import func
 
 from app.models.brand import Brand
 from app.schemas.brand import BrandCreate, BrandUpdate
-
-from sqlalchemy.sql.expression import func
 
 class BrandService:
     def __init__(self, session: Session):
@@ -39,28 +38,29 @@ class BrandService:
         self.session.delete(brand)
         self.session.commit()
     
-    def get_random_pair(self) -> list[Brand]:
-        """
-        Returns 2 random brands for a face-off.
-        """
-        brands = self.session.exec(select(Brand).order_by(func.random()).limit(2)).all()
+    def get_random_pair(self, country_code: str | None = None) -> list[Brand]:
+        statement = select(Brand).order_by(func.random())
         
-        if len(brands) < 2:
-            raise HTTPException(status_code=400, detail="Not enough brands to form a pair")
+        if country_code:
+            candidates = self.session.exec(statement.limit(50)).all()
             
-        return brands
+            filtered = [
+                b for b in candidates 
+                if country_code in b.countries_active or "Global" in b.regions_present
+            ]
+            
+            if len(filtered) < 2:
+                return candidates[:2] if len(candidates) >= 2 else []
+                
+            return filtered[:2]
+
+        return self.session.exec(statement.limit(2)).all()
     
     def get_leaderboard(self, limit: int = 50, offset: int = 0) -> list[Brand]:
-        """
-        Returns brands sorted by ELO (descending).
-        """
         statement = select(Brand).order_by(Brand.elo.desc()).offset(offset).limit(limit)
         return self.session.exec(statement).all()
 
     def get_all(self, search: str | None = None, limit: int = 100, offset: int = 0) -> list[Brand]:
-        """
-        Returns all brands, optionally filtered by name (case-insensitive).
-        """
         statement = select(Brand)
         
         if search:

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Query
 from sqlmodel import Session
 import uuid
 
@@ -12,6 +12,13 @@ router = APIRouter()
 def get_service(session: Session = Depends(get_session)) -> BrandService:
     return BrandService(session)
 
+@router.get("/random", response_model=list[BrandRead])
+def get_random_pair(
+    country: str | None = None, 
+    service: BrandService = Depends(get_service)
+):
+    return service.get_random_pair(country_code=country)
+
 @router.get("/", response_model=list[BrandRead])
 def read_brands(
     search: str | None = None,
@@ -20,10 +27,6 @@ def read_brands(
     service: BrandService = Depends(get_service)
 ):
     return service.get_all(search=search, limit=limit, offset=offset)
-
-@router.get("/random", response_model=list[BrandRead])
-def get_random_pair(service: BrandService = Depends(get_service)):
-    return service.get_random_pair()
 
 @router.get("/leaderboard", response_model=list[BrandRead])
 def get_leaderboard(
