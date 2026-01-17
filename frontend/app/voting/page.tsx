@@ -235,12 +235,6 @@ export default function VotingPage() {
         />
       ))}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-4 relative z-10">
-        {/* Question Text */}
-        <div className="text-center mb-12 relative z-20 -mt-8">
-          <h2 className="text-2xl font-semibold text-milk-tea-darker">
-            Which boba is better?
-          </h2>
-        </div>
         {/* Dual Card Layout */}
         <div className="flex flex-col md:flex-row gap-20 md:gap-24 items-center justify-center max-w-5xl mx-auto relative">
           {brands.map((brand, index) => (
@@ -267,6 +261,30 @@ export default function VotingPage() {
               )}
             </React.Fragment>
           ))}
+        </div>
+        
+        {/* Tie and Skip Buttons */}
+        <div className="flex justify-center gap-4 mt-8 relative z-20">
+          <button
+            onClick={() => {
+              // Handle tie
+              console.log('Tie selected');
+            }}
+            disabled={isVoting || !!votedBrandId}
+            className="px-6 py-3 bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-lg text-milk-tea-darker font-semibold hover:bg-white/40 hover:border-milk-tea-dark transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+          >
+            Tie
+          </button>
+          <button
+            onClick={() => {
+              // Handle skip
+              console.log('Skip selected');
+            }}
+            disabled={isVoting || !!votedBrandId}
+            className="px-6 py-3 bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-lg text-milk-tea-darker font-semibold hover:bg-white/40 hover:border-milk-tea-dark transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+          >
+            Skip
+          </button>
         </div>
       </div>
 
