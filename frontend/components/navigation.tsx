@@ -13,8 +13,8 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-sm border-b border-milk-tea-medium/10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="fixed top-0 left-0 right-0 z-50 pointer-events-none backdrop-blur-md border-b border-milk-tea-medium/20" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pointer-events-auto">
         <div className="flex items-center justify-between h-20 py-4">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <Image
