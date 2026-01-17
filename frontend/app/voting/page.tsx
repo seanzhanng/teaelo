@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import BrandCard from '@/components/BrandCard';
 
 interface Brand {
@@ -12,6 +12,7 @@ interface Brand {
   tier: 'S' | 'A' | 'B' | 'C' | 'D' | 'F';
   rank: number;
   established_date?: string;
+  price?: 1 | 2 | 3 | 4; // $ to $$$$
 }
 
 interface EmojiParticle {
@@ -30,22 +31,24 @@ const placeholderBrands: Brand[] = [
   {
     id: '550e8400-e29b-41d4-a716-446655440000',
     name: 'Boba Guys',
-    logo_url: 'https://via.placeholder.com/150/432f26/ebddd0?text=BG',
+    logo_url: 'https://static1.squarespace.com/static/50ce46ece4b01020c34fd52b/t/6247fba73cb3cc54675fc60a/1648884647375/bobaguys_logo_FINAL+%283%29.png?format=1500w',
     country_of_origin: 'United States',
     elo: 1850.5,
     tier: 'A',
     rank: 12,
     established_date: '2011',
+    price: 3, // $$$
   },
   {
     id: '550e8400-e29b-41d4-a716-446655440001',
     name: 'Gong Cha',
-    logo_url: 'https://via.placeholder.com/150/432f26/ebddd0?text=GC',
+    logo_url: 'https://gong-cha-usa.com/wp-content/uploads/Gong-cha-vertical-logo-symbol-mark-540x540-opt.png',
     country_of_origin: 'Taiwan',
     elo: 1920.3,
     tier: 'S',
     rank: 8,
     established_date: '2006',
+    price: 2, // $$
   },
 ];
 
@@ -201,33 +204,68 @@ export default function VotingPage() {
     }
   };
 
+  // Generate random irregular shapes for background with animation delays
+  const backgroundShapes = [
+    { top: '15%', left: '10%', width: '400px', height: '350px', clipPath: 'polygon(20% 0%, 80% 0%, 100% 40%, 85% 70%, 50% 100%, 15% 80%, 0% 50%)', opacity: 0.3, morphDelay: '0s', floatDelay: '0s', morphAnimation: 'blobMorph1' },
+    { top: '60%', left: '5%', width: '350px', height: '400px', clipPath: 'polygon(30% 10%, 90% 5%, 100% 50%, 75% 95%, 25% 100%, 0% 60%, 5% 30%)', opacity: 0.25, morphDelay: '2s', floatDelay: '1s', morphAnimation: 'blobMorph2' },
+    { top: '25%', left: '70%', width: '450px', height: '380px', clipPath: 'polygon(10% 15%, 85% 10%, 95% 45%, 80% 80%, 40% 95%, 5% 70%, 0% 35%)', opacity: 0.28, morphDelay: '4s', floatDelay: '2s', morphAnimation: 'blobMorph3' },
+    { top: '70%', left: '75%', width: '380px', height: '420px', clipPath: 'polygon(25% 5%, 75% 0%, 100% 35%, 90% 75%, 60% 100%, 20% 90%, 0% 55%)', opacity: 0.22, morphDelay: '1s', floatDelay: '3s', morphAnimation: 'blobMorph4' },
+    { top: '5%', left: '45%', width: '320px', height: '300px', clipPath: 'polygon(15% 20%, 80% 15%, 95% 50%, 70% 85%, 30% 90%, 5% 60%, 0% 30%)', opacity: 0.2, morphDelay: '3s', floatDelay: '1.5s', morphAnimation: 'blobMorph5' },
+    { top: '45%', left: '25%', width: '360px', height: '340px', clipPath: 'polygon(20% 10%, 90% 5%, 100% 40%, 85% 75%, 45% 95%, 10% 80%, 0% 45%)', opacity: 0.26, morphDelay: '5s', floatDelay: '2.5s', morphAnimation: 'blobMorph6' },
+    { top: '80%', left: '50%', width: '340px', height: '360px', clipPath: 'polygon(30% 0%, 70% 5%, 95% 40%, 80% 80%, 50% 100%, 15% 85%, 0% 50%)', opacity: 0.24, morphDelay: '1.5s', floatDelay: '4s', morphAnimation: 'blobMorph7' },
+  ];
+
   return (
     <div className="h-full overflow-hidden flex items-center justify-center relative">
-      {/* Gradient Background - Splotchy darker milk tea in the middle */}
-      <div 
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          background: `
-            radial-gradient(circle at 50% 50%, rgba(212, 196, 176, 0.7) 0%, transparent 50%),
-            radial-gradient(circle at 48% 52%, rgba(196, 178, 154, 0.8) 0%, transparent 45%),
-            radial-gradient(circle at 52% 48%, rgba(180, 160, 140, 0.6) 0%, transparent 55%),
-            radial-gradient(circle at 50% 50%, rgba(212, 196, 176, 0.65) 0%, transparent 48%)
-          `,
-        }}
-      />
+      {/* Random irregular shapes background */}
+      {backgroundShapes.map((shape, index) => (
+        <div
+          key={index}
+          className="fixed pointer-events-none z-0"
+          style={{
+            top: shape.top,
+            left: shape.left,
+            width: shape.width,
+            height: shape.height,
+            clipPath: shape.clipPath,
+            background: `radial-gradient(ellipse at center, rgba(180, 160, 140, ${shape.opacity}) 0%, rgba(180, 160, 140, ${shape.opacity * 0.6}) 50%, transparent 100%)`,
+            filter: 'blur(80px)',
+            animation: `${shape.morphAnimation} ${15 + index * 2}s cubic-bezier(0.4, 0, 0.2, 1) infinite ${shape.morphDelay}, blobFloat ${20 + index * 3}s ease-in-out infinite ${shape.floatDelay}`,
+          }}
+        />
+      ))}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-4 relative z-10">
+        {/* Question Text */}
+        <div className="text-center mb-12 relative z-20 -mt-8">
+          <h2 className="text-2xl font-semibold text-milk-tea-darker">
+            Which boba is better?
+          </h2>
+        </div>
         {/* Dual Card Layout */}
-        <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-center max-w-5xl mx-auto -mt-16">
-          {brands.map((brand) => (
-            <div key={brand.id} className="flex-1 w-full max-w-md">
-              <BrandCard
-                brand={brand}
-                onClick={(e) => handleVote(brand.id, e)}
-                disabled={isVoting || !!votedBrandId}
-                isRevealed={revealedBrandIds.has(brand.id)}
-                isSelected={votedBrandId === brand.id}
-              />
-            </div>
+        <div className="flex flex-col md:flex-row gap-20 md:gap-24 items-center justify-center max-w-5xl mx-auto relative">
+          {brands.map((brand, index) => (
+            <React.Fragment key={brand.id}>
+              <div className="flex-1 w-full max-w-md">
+                <BrandCard
+                  brand={brand}
+                  onClick={(e) => handleVote(brand.id, e)}
+                  disabled={isVoting || !!votedBrandId}
+                  isRevealed={revealedBrandIds.has(brand.id)}
+                  isSelected={votedBrandId === brand.id}
+                />
+              </div>
+              {index === 0 && (
+                <div className="hidden md:flex flex-col items-center justify-center absolute left-1/2 transform -translate-x-1/2 z-30 h-full">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-px h-16 bg-milk-tea-medium"></div>
+                    <div className="bg-white/60 backdrop-blur-sm border-2 border-milk-tea-medium rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
+                      <span className="text-milk-tea-darker font-bold text-lg">VS</span>
+                    </div>
+                    <div className="w-px h-16 bg-milk-tea-medium"></div>
+                  </div>
+                </div>
+              )}
+            </React.Fragment>
           ))}
         </div>
       </div>

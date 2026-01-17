@@ -12,6 +12,7 @@ interface Brand {
   tier: 'S' | 'A' | 'B' | 'C' | 'D' | 'F';
   rank: number;
   established_date?: string;
+  price?: 1 | 2 | 3 | 4; // $ to $$$$
 }
 
 interface BrandCardProps {
@@ -157,11 +158,11 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
       onMouseLeave={handleMouseLeave}
       className={`
         relative w-full max-w-md mx-auto
-        bg-white/80 backdrop-blur-sm
+        bg-white/30 backdrop-blur-md
         border-2 ${isSelected ? 'border-milk-tea-dark' : 'border-milk-tea-medium'}
-        p-8 rounded-lg
+        p-10 rounded-xl
         transition-all duration-300 ease-out
-        ${isSelected ? 'scale-105 shadow-2xl translate-y-[-20px]' : ''}
+        ${isSelected ? 'scale-105 shadow-2xl translate-y-[-20px]' : 'shadow-lg'}
         ${isRevealed && !isSelected ? 'opacity-40 grayscale' : ''}
         hover:border-milk-tea-dark hover:shadow-xl
         active:scale-[0.98]
@@ -177,9 +178,9 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
       {/* Glint Animation - Full card sweep */}
       <div className="card-glint absolute inset-0 pointer-events-none z-10" />
       {/* Logo */}
-      <div className="flex justify-center mb-3 relative z-20">
+      <div className="flex justify-center mb-4 relative z-20">
         {brand.logo_url ? (
-          <div className="relative w-56 h-56">
+          <div className="relative w-64 h-64">
             <Image
               src={brand.logo_url}
               alt={`${brand.name} logo`}
@@ -192,8 +193,8 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
             />
           </div>
         ) : (
-          <div className="w-56 h-56 bg-milk-tea-medium rounded-lg flex items-center justify-center">
-            <span className="text-5xl font-bold text-milk-tea-dark">
+          <div className="w-64 h-64 bg-milk-tea-medium rounded-lg flex items-center justify-center">
+            <span className="text-6xl font-bold text-milk-tea-dark">
               {brand.name.charAt(0)}
             </span>
           </div>
@@ -201,12 +202,21 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
       </div>
 
       {/* Brand Name */}
-      <h3 className="text-3xl font-semibold text-center mb-3 relative z-20" style={{ color: 'var(--milk-tea-darker)' }}>
+      <h3 className="text-3xl font-semibold text-center mb-2 relative z-20" style={{ color: 'var(--milk-tea-darker)' }}>
         {brand.name}
       </h3>
 
+      {/* Price Indicator */}
+      {brand.price && (
+        <div className="flex justify-center mb-4 relative z-20">
+          <div className="text-milk-tea-dark font-semibold text-xl">
+            {'$'.repeat(brand.price)}
+          </div>
+        </div>
+      )}
+
       {/* Tier Badge */}
-      <div className="flex justify-center mb-3 relative z-20">
+      <div className="flex justify-center mb-4 relative z-20">
         <span
           className={`px-4 py-2 rounded text-sm font-semibold transition-opacity ${
             isRevealed 
