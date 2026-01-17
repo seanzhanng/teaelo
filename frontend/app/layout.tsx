@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fredoka } from "next/font/google";
 import Navigation from "@/components/navigation";
 import FlowingLiquid from "@/components/FlowingLiquid";
+import BackgroundBlobs from "@/components/BackgroundBlobs";
 import "../styles/globals.css";
 
 const fredoka = Fredoka({
@@ -25,6 +26,7 @@ export default function RootLayout({
       <body
         className={`${fredoka.variable} antialiased h-full flex flex-col overflow-hidden`}
       >
+        <BackgroundBlobs />
         <Navigation />
         <main className="flex-1 overflow-hidden">
           {children}

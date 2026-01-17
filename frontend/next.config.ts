@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'gong-cha-usa.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'www.scrapehero.com',
+      },
     ],
   },
 };
