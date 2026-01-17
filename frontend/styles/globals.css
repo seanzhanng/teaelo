@@ -67,3 +67,30 @@ body {
   animation: waveMarqueeRight 25s linear infinite;
 }
 
+@keyframes glint {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(200%) translateY(200%) rotate(45deg);
+  }
+}
+
+.card-glint {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 45%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0.3) 55%,
+    transparent 100%
+  );
+  width: 150%;
+  height: 150%;
+  top: -25%;
+  left: -25%;
+  animation: glint 3s ease-in-out infinite;
+  animation-delay: 0.5s;
+  z-index: 1;
+}
+

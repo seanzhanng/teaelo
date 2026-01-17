@@ -7,12 +7,13 @@ const FlowingLiquid = () => {
   const liquidColor = '#d0c0a8'; // Between milk-tea-medium and the darker version
   
   // Each segment is exactly 1200 units wide and starts/ends at same Y for seamless tiling.
+  // Using cubic bezier curves (C) for smoother, more organic waves
   const wave1Segment =
-    'M0,100 Q150,40 300,70 Q450,100 600,85 Q750,70 900,90 Q1050,110 1200,100';
+    'M0,100 C200,50 300,60 400,80 C500,100 600,90 700,85 C800,80 900,90 1000,100 C1100,110 1150,105 1200,100';
   const wave2Segment =
-    'M0,120 Q200,70 400,100 Q600,130 800,110 Q1000,90 1200,120';
+    'M0,120 C150,80 250,90 350,100 C450,110 550,120 650,115 C750,110 850,105 950,110 C1050,115 1125,118 1200,120';
   const wave3Segment =
-    'M0,130 Q250,90 500,115 Q750,140 1000,120 Q1125,100 1200,130';
+    'M0,130 C180,100 320,110 460,120 C600,130 700,125 800,120 C900,115 1000,118 1100,125 C1150,128 1175,129 1200,130';
 
   const closeToBottom = ' L1200,200 L0,200 Z';
 
