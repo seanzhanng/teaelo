@@ -211,7 +211,7 @@ export default function VotingPage() {
         <div className="flex flex-col md:flex-row gap-20 md:gap-24 items-center justify-center max-w-5xl mx-auto relative">
           {brands.map((brand, index) => (
             <React.Fragment key={brand.id}>
-              <div className="flex-1 w-full max-w-md">
+              <div className={`flex-1 w-full max-w-md animate-fade-in-scale`} style={{ animationDelay: `${index * 0.15}s`, opacity: 0, animationFillMode: 'forwards' }}>
                 <BrandCard
                   brand={brand}
                   onClick={(e) => handleVote(brand.id, e)}
@@ -236,14 +236,14 @@ export default function VotingPage() {
         </div>
         
         {/* Tie and Skip Buttons */}
-        <div className="flex justify-center gap-4 mt-8 relative z-20">
+        <div className="flex justify-center gap-4 mt-8 relative z-20 animate-fade-in-up" style={{ animationDelay: '0.4s', opacity: 0, animationFillMode: 'forwards' }}>
           <button
             onClick={() => {
               // Handle tie
               console.log('Tie selected');
             }}
             disabled={isVoting || !!votedBrandId}
-            className="px-6 py-3 bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-lg text-milk-tea-darker font-semibold hover:bg-white/40 hover:border-milk-tea-dark transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+            className="px-6 py-3 bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-lg text-milk-tea-darker font-semibold hover:bg-white/40 hover:border-milk-tea-dark hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
           >
             Tie
           </button>
@@ -253,7 +253,7 @@ export default function VotingPage() {
               console.log('Skip selected');
             }}
             disabled={isVoting || !!votedBrandId}
-            className="px-6 py-3 bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-lg text-milk-tea-darker font-semibold hover:bg-white/40 hover:border-milk-tea-dark transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+            className="px-6 py-3 bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-lg text-milk-tea-darker font-semibold hover:bg-white/40 hover:border-milk-tea-dark hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
           >
             Skip
           </button>

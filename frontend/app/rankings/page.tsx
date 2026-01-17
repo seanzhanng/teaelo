@@ -99,7 +99,7 @@ export default function RankingsPage() {
   return (
     <div className="h-full overflow-y-auto scrollbar-hide relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
-      <div className="text-center mb-12">
+      <div className="text-center mb-12 animate-fade-in-up">
         <h1 className="text-4xl font-bold text-milk-tea-darker mb-4">
           Global Leaderboard
         </h1>
@@ -111,7 +111,7 @@ export default function RankingsPage() {
         {/* Podium for Top 3 */}
         <div className="flex items-end justify-center gap-6 mb-16 relative z-20">
           {/* 2nd Place */}
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center animate-fade-in-scale animate-delay-200">
             <div className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-6 shadow-lg mb-4 w-52">
               <div className="flex justify-center mb-3">
                 {top3Brands[1].logo_url ? (
@@ -148,8 +148,8 @@ export default function RankingsPage() {
             </div>
           </div>
 
-          {/* 1st Place */}
-          <div className="flex flex-col items-center">
+              {/* 1st Place */}
+              <div className="flex flex-col items-center animate-fade-in-scale animate-delay-100">
             <div className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-7 shadow-2xl mb-4 w-56">
               <div className="flex justify-center mb-3">
                 {top3Brands[0].logo_url ? (
@@ -186,8 +186,8 @@ export default function RankingsPage() {
             </div>
           </div>
 
-          {/* 3rd Place */}
-          <div className="flex flex-col items-center">
+              {/* 3rd Place */}
+              <div className="flex flex-col items-center animate-fade-in-scale animate-delay-300">
             <div className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-6 shadow-lg mb-4 w-52">
               <div className="flex justify-center mb-3">
                 {top3Brands[2].logo_url ? (
@@ -226,10 +226,10 @@ export default function RankingsPage() {
         </div>
 
         {/* Animated Arrow */}
-        <div className="flex justify-center mb-8 relative z-20">
+        <div className="flex justify-center mb-8 relative z-20 animate-fade-in-up animate-delay-400">
           <button
             onClick={scrollToResults}
-            className="animate-bounce text-milk-tea-darker hover:text-milk-tea-dark transition-colors"
+            className="text-milk-tea-darker hover:text-milk-tea-dark transition-colors animate-arrow-bounce"
             aria-label="Scroll to results"
           >
             <svg
@@ -242,25 +242,25 @@ export default function RankingsPage() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                d="M19 9l-7 7-7-7"
               />
             </svg>
           </button>
         </div>
       </div>
 
-      {/* Results Section */}
-      <div id="results-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
-        {/* Search Bar */}
-        <div className="mb-8">
-          <div className="max-w-md mx-auto">
-            <input
-              type="text"
-              placeholder="Search brands..."
-              value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="w-full px-4 py-3 bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-lg text-milk-tea-darker placeholder-milk-tea-dark/50 focus:outline-none focus:border-milk-tea-dark transition-colors shadow-lg"
-            />
+          {/* Results Section */}
+          <div id="results-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+            {/* Search Bar */}
+            <div className="mb-8 animate-fade-in-up">
+              <div className="max-w-md mx-auto">
+                <input
+                  type="text"
+                  placeholder="Search brands..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  className="w-full px-4 py-3 bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-lg text-milk-tea-darker placeholder-milk-tea-dark/50 focus:outline-none focus:border-milk-tea-dark transition-all duration-300 shadow-lg focus:scale-[1.02]"
+                />
           </div>
         </div>
 
@@ -278,9 +278,9 @@ export default function RankingsPage() {
                   <th className="px-6 py-4 text-left text-sm font-semibold text-milk-tea-darker">Price</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-milk-tea-medium/30">
-                {filteredBrands.map((brand) => (
-                  <tr key={brand.id} className="hover:bg-white/20 transition-colors">
+                  <tbody className="divide-y divide-milk-tea-medium/30">
+                    {filteredBrands.map((brand, index) => (
+                      <tr key={brand.id} className="hover:bg-white/20 transition-all duration-300 animate-fade-in-up" style={{ animationDelay: `${index * 0.05}s`, opacity: 0, animationFillMode: 'forwards' }}>
                     <td className="px-6 py-4 text-milk-tea-darker font-bold">#{brand.rank}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
