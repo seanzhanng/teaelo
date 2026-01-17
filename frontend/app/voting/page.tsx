@@ -52,7 +52,7 @@ const placeholderBrands: Brand[] = [
 const emojis = ['🧋', '💜', '⭐', '✨', '🎉', '💫', '🌟', '🥤'];
 
 export default function VotingPage() {
-  const [brands] = useState<Brand[]>(placeholderBrands);
+  const [brands, setBrands] = useState<Brand[]>(placeholderBrands);
   const [isVoting, setIsVoting] = useState(false);
   const [votedBrandId, setVotedBrandId] = useState<string | null>(null);
   const [revealedBrandIds, setRevealedBrandIds] = useState<Set<string>>(new Set());
@@ -166,7 +166,31 @@ export default function VotingPage() {
         throw new Error('Vote failed');
       }
 
-      // In the future, this would fetch new brands or show success message
+      // Placeholder: Update brands with new Elo, Rank, and Tier
+      // In the future, this would come from the backend response
+      setBrands((prevBrands) => {
+        return prevBrands.map((brand) => {
+          if (brand.id === winnerId) {
+            // Winner: Elo +8, rank might improve, tier might upgrade
+            return {
+              ...brand,
+              elo: brand.elo + 8,
+              rank: Math.max(1, brand.rank - 1), // Improve rank (lower number is better)
+              // Tier could upgrade if Elo crosses threshold (placeholder logic)
+            };
+          } else if (brand.id === loserId) {
+            // Loser: Elo -8, rank might worsen, tier might downgrade
+            return {
+              ...brand,
+              elo: brand.elo - 8,
+              rank: brand.rank + 1, // Worsen rank
+              // Tier could downgrade if Elo crosses threshold (placeholder logic)
+            };
+          }
+          return brand;
+        });
+      });
+
       console.log('Vote submitted successfully');
     } catch (error) {
       console.error('Error submitting vote:', error);

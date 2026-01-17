@@ -36,7 +36,69 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
   // Initialize with fixed values to avoid hydration mismatch, then set random values on client
   const [randomElo, setRandomElo] = useState(0);
   const [randomRank, setRandomRank] = useState(0);
+  const [animatedElo, setAnimatedElo] = useState(brand.elo);
+  const [isAnimatingElo, setIsAnimatingElo] = useState(false);
+  const [eloChange, setEloChange] = useState<number | null>(null);
+  const [rankChange, setRankChange] = useState<number | null>(null);
+  const previousEloRef = useRef(brand.elo);
+  const previousRankRef = useRef(brand.rank);
   const cardRef = useRef<HTMLButtonElement>(null);
+
+  // Animate Elo when it changes
+  useEffect(() => {
+    if (isRevealed && brand.elo !== previousEloRef.current) {
+      const oldElo = previousEloRef.current;
+      const newElo = brand.elo;
+      const difference = newElo - oldElo;
+      const duration = 1500; // 1.5 second animation
+      const startTime = Date.now();
+      
+      // Show the change indicator
+      setEloChange(difference);
+      setIsAnimatingElo(true);
+      
+      const animate = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Ease out animation
+        const easedProgress = 1 - Math.pow(1 - progress, 3);
+        const currentElo = oldElo + (difference * easedProgress);
+        
+        setAnimatedElo(Math.round(currentElo));
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          setAnimatedElo(newElo);
+          setIsAnimatingElo(false);
+          // Keep the change indicator visible
+        }
+      };
+      
+      requestAnimationFrame(animate);
+      previousEloRef.current = newElo;
+    } else if (!isRevealed) {
+      // Reset animated Elo when not revealed
+      setAnimatedElo(brand.elo);
+      previousEloRef.current = brand.elo;
+      setEloChange(null);
+    }
+  }, [brand.elo, isRevealed]);
+
+  // Track rank changes
+  useEffect(() => {
+    if (isRevealed && brand.rank !== previousRankRef.current) {
+      const difference = brand.rank - previousRankRef.current;
+      // Show the change indicator (keep it visible)
+      setRankChange(difference);
+      previousRankRef.current = brand.rank;
+    } else if (!isRevealed) {
+      // Reset when not revealed
+      previousRankRef.current = brand.rank;
+      setRankChange(null);
+    }
+  }, [brand.rank, isRevealed]);
 
   // Initialize random numbers on client mount and update periodically if not revealed (slower)
   useEffect(() => {
@@ -160,18 +222,46 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
       <div className="grid grid-cols-2 gap-6 mt-3 mb-3 relative z-20">
         <div className="text-center">
           <div className="text-sm text-milk-tea-dark mb-2">Elo</div>
-          <div className={`text-2xl font-bold transition-opacity ${
-            isRevealed ? 'text-milk-tea-darker' : 'text-gray-400 opacity-60'
-          }`}>
-            {isRevealed ? Math.round(brand.elo) : (randomElo || Math.round(brand.elo))}
+          <div className="flex items-center justify-center gap-2">
+            <div className={`text-2xl font-bold transition-opacity ${
+              isRevealed ? 'text-milk-tea-darker' : 'text-gray-400 opacity-60'
+            }`}>
+              {isRevealed ? Math.round(animatedElo) : (randomElo || Math.round(brand.elo))}
+            </div>
+            {eloChange !== null && (
+              <span
+                className={`text-lg font-semibold transition-opacity duration-300 ${
+                  eloChange > 0 ? 'text-green-600' : 'text-red-600'
+                }`}
+                style={{
+                  animation: 'fadeIn 0.3s ease-in',
+                }}
+              >
+                {eloChange > 0 ? '+' : ''}{eloChange}
+              </span>
+            )}
           </div>
         </div>
         <div className="text-center">
           <div className="text-sm text-milk-tea-dark mb-2">Rank</div>
-          <div className={`text-2xl font-bold transition-opacity ${
-            isRevealed ? 'text-milk-tea-darker' : 'text-gray-400 opacity-60'
-          }`}>
-            {isRevealed ? `#${brand.rank}` : `#${randomRank || brand.rank}`}
+          <div className="flex items-center justify-center gap-2">
+            <div className={`text-2xl font-bold transition-opacity ${
+              isRevealed ? 'text-milk-tea-darker' : 'text-gray-400 opacity-60'
+            }`}>
+              {isRevealed ? `#${brand.rank}` : `#${randomRank || brand.rank}`}
+            </div>
+            {rankChange !== null && rankChange !== 0 && (
+              <span
+                className={`text-lg font-semibold transition-opacity duration-300 ${
+                  rankChange < 0 ? 'text-green-600' : 'text-red-600'
+                }`}
+                style={{
+                  animation: 'fadeIn 0.3s ease-in',
+                }}
+              >
+                {rankChange > 0 ? '+' : ''}{rankChange}
+              </span>
+            )}
           </div>
         </div>
       </div>
