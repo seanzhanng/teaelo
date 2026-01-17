@@ -97,7 +97,7 @@ export default function RankingsPage() {
   };
 
   return (
-    <div className="h-full overflow-y-auto relative">
+    <div className="h-full overflow-y-auto scrollbar-hide relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold text-milk-tea-darker mb-4">
@@ -150,7 +150,7 @@ export default function RankingsPage() {
 
           {/* 1st Place */}
           <div className="flex flex-col items-center">
-            <div className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-dark rounded-xl p-7 shadow-2xl mb-4 w-56">
+            <div className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-7 shadow-2xl mb-4 w-56">
               <div className="flex justify-center mb-3">
                 {top3Brands[0].logo_url ? (
                   <div className="relative w-32 h-32">
@@ -181,8 +181,8 @@ export default function RankingsPage() {
                 {Math.round(top3Brands[0].elo)} <span className="text-milk-tea-dark text-sm font-normal">Elo</span>
               </div>
             </div>
-            <div className="bg-gradient-to-t from-milk-tea-dark to-milk-tea-medium w-56 h-44 rounded-t-lg flex items-center justify-center shadow-xl">
-              <span className="text-6xl font-bold text-white">1</span>
+            <div className="bg-gradient-to-t from-milk-tea-medium to-milk-tea-light w-56 h-44 rounded-t-lg flex items-center justify-center shadow-xl">
+              <span className="text-6xl font-bold text-milk-tea-darker">1</span>
             </div>
           </div>
 
@@ -266,7 +266,7 @@ export default function RankingsPage() {
 
         {/* Rankings Table */}
         <div className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl shadow-lg overflow-hidden">
-          <div className="overflow-x-auto scrollbar-hide">
+          <div className="scrollbar-hide">
             <table className="w-full">
               <thead className="bg-milk-tea-medium/50">
                 <tr>
