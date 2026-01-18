@@ -36,8 +36,8 @@ export default async function BrandPage({ params }: PageProps) {
   };
 
   return (
-    <div className="min-h-full w-full pt-20 pb-48 relative z-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 relative z-10">
+    <div className="min-h-full w-full pt-20 pb-48 relative z-10 lg:h-screen lg:overflow-y-auto lg:pb-0">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 relative z-10 lg:h-full lg:flex lg:flex-col lg:justify-center">
         {/* Mobile: Stacked Layout */}
         <div className="lg:hidden space-y-8">
           {/* Side Card - Mobile */}

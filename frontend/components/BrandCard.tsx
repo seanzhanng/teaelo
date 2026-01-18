@@ -192,12 +192,12 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className={`
-        relative w-full max-w-[280px] sm:max-w-xs md:max-w-sm mx-auto
+        relative w-full max-w-[90vw] sm:max-w-2xl md:w-full md:min-w-[280px] md:max-w-[320px] lg:max-w-[360px] xl:max-w-[380px] 2xl:max-w-[400px] md:mx-0 mx-auto
         bg-white/30 backdrop-blur-md
         border-2 ${borderColor}
-        p-3 sm:p-4 md:p-6 lg:p-8 rounded-xl
+        p-3 sm:p-4 md:p-5 lg:p-6 xl:p-7 rounded-xl
         transition-all duration-300 ease-out
-        ${isSelected ? 'scale-[1.02] sm:scale-105 shadow-2xl translate-y-[-5px] sm:translate-y-[-10px] md:translate-y-[-20px] z-40' : 'shadow-lg z-10'}
+        ${isSelected ? 'scale-[1.02] sm:scale-105 shadow-2xl translate-y-[-5px] sm:translate-y-[-10px] md:translate-y-[-10px] z-40' : 'shadow-lg z-10'}
         ${isRevealed && !isSelected && !isDisplayMode ? 'opacity-40 grayscale' : ''}
         ${hoverBorderColor} hover:shadow-xl
         active:scale-[0.98]

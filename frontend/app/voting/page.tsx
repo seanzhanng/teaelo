@@ -39,9 +39,50 @@ const convertBrand = (fullBrand: FullBrand): Brand => ({
   price: fullBrand.metadata.price_category,
 });
 
+// Map common country names to match region names in brand data
+const countryMapping: { [key: string]: string } = {
+  'US': 'United States',
+  'USA': 'United States',
+  'CA': 'Canada',
+  'GB': 'United Kingdom',
+  'UK': 'United Kingdom',
+  'AU': 'Australia',
+  'JP': 'Japan',
+  'KR': 'South Korea',
+  'SG': 'Singapore',
+  'MY': 'Malaysia',
+  'PH': 'Philippines',
+  'ID': 'Indonesia',
+  'TW': 'Taiwan',
+};
+
+// Get user's country from browser locale or geolocation
+const getUserCountry = async (): Promise<string | null> => {
+  try {
+    // Try to get country from IP geolocation (free service)
+    const response = await fetch('https://ipapi.co/json/');
+    if (response.ok) {
+      const data = await response.json();
+      const countryCode = data.country_code;
+      return countryMapping[countryCode] || data.country_name || null;
+    }
+  } catch (error) {
+    console.log('Could not detect location, defaulting to international');
+  }
+  
+  // Fallback: try to get from browser locale
+  try {
+    const locale = navigator.language || (navigator as any).userLanguage;
+    const countryCode = locale.split('-')[1]?.toUpperCase();
+    return countryMapping[countryCode] || null;
+  } catch (error) {
+    return null;
+  }
+};
+
 // Get random 2 brands for voting (client-side only)
-const getRandomBrands = (): Brand[] => {
-  const shuffled = [...allBrands].sort(() => Math.random() - 0.5);
+const getRandomBrands = (availableBrands: FullBrand[] = allBrands): Brand[] => {
+  const shuffled = [...availableBrands].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, 2).map(convertBrand);
 };
 
@@ -52,11 +93,45 @@ const emojis = ['🧋', '💜', '⭐', '✨', '🎉', '💫', '🌟', '🥤'];
 
 export default function VotingPage() {
   const [brands, setBrands] = useState<Brand[]>(initialBrands);
+  const [isLocal, setIsLocal] = useState(true);
+  const [userCountry, setUserCountry] = useState<string | null>(null);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(true);
 
-  // Randomize brands on client-side only to avoid hydration mismatch
+  // Detect user's country on mount
   useEffect(() => {
-    setBrands(getRandomBrands());
+    getUserCountry().then((country) => {
+      setUserCountry(country);
+      setIsDetectingLocation(false);
+    });
   }, []);
+
+  // Filter brands based on local/international toggle
+  const getFilteredBrands = React.useCallback((): FullBrand[] => {
+    if (!isLocal || !userCountry) {
+      return allBrands; // Show all brands if international or country not detected
+    }
+    
+    // Filter brands that have user's country in their regions
+    return allBrands.filter((brand) => 
+      brand.metadata.regions.some((region) => 
+        region.toLowerCase() === userCountry.toLowerCase()
+      )
+    );
+  }, [isLocal, userCountry]);
+
+  // Get new random brands when filter changes
+  useEffect(() => {
+    if (isDetectingLocation) return;
+    
+    const filtered = getFilteredBrands();
+    if (filtered.length >= 2) {
+      setBrands(getRandomBrands(filtered));
+    } else {
+      // If not enough local brands, show all brands
+      setBrands(getRandomBrands(allBrands));
+    }
+  }, [isLocal, userCountry, isDetectingLocation, getFilteredBrands]);
+
   const [isVoting, setIsVoting] = useState(false);
   const [votedBrandId, setVotedBrandId] = useState<string | null>(null);
   const [revealedBrandIds, setRevealedBrandIds] = useState<Set<string>>(new Set());
@@ -208,7 +283,12 @@ export default function VotingPage() {
       
       // After a delay, reset the vote state to allow new voting
       setTimeout(() => {
-        setBrands(getRandomBrands());
+        const filtered = getFilteredBrands();
+        if (filtered.length >= 2) {
+          setBrands(getRandomBrands(filtered));
+        } else {
+          setBrands(getRandomBrands(allBrands));
+        }
         setVotedBrandId(null);
         setRevealedBrandIds(new Set());
       }, 2000);
@@ -223,17 +303,17 @@ export default function VotingPage() {
   };
 
   return (
-    <div className="min-h-full w-full relative pt-24 sm:pt-20 pb-8">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 w-full py-4 sm:py-6 md:py-8 relative z-10">
+    <div className="min-h-full w-full relative pt-24 sm:pt-20 md:pt-24 pb-8 md:h-screen md:overflow-hidden">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 w-full py-4 sm:py-6 md:py-8 relative z-10 h-full md:flex md:flex-col md:justify-center">
         {/* Dual Card Layout */}
-        <div className="flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-12 lg:gap-16 items-center justify-center max-w-4xl mx-auto relative min-h-[calc(100vh-12rem)] md:min-h-[calc(100vh-16rem)]">
+        <div className="flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-16 lg:gap-24 items-center justify-center w-full relative flex-1 md:min-h-0">
           {brands.map((brand, index) => (
             <React.Fragment key={brand.id}>
               <div 
                 ref={(el) => {
                   cardRefs.current[brand.id] = el;
                 }}
-                className={`flex-1 flex justify-center w-full max-w-[280px] sm:max-w-xs md:max-w-sm lg:max-w-none animate-fade-in-scale`} 
+                className={`w-full md:flex-1 flex ${index === 0 ? 'md:justify-end' : 'md:justify-start'} justify-center items-center min-w-0 animate-fade-in-scale`} 
                 style={{ animationDelay: `${index * 0.15}s`, opacity: 0, animationFillMode: 'forwards' }}
               >
                 <BrandCard
@@ -272,28 +352,65 @@ export default function VotingPage() {
           ))}
         </div>
         
-        {/* Tie and Skip Buttons */}
-        <div className="flex justify-center gap-3 sm:gap-4 mt-6 sm:mt-8 md:mt-10 relative z-20 animate-fade-in-up" style={{ animationDelay: '0.4s', opacity: 0, animationFillMode: 'forwards' }}>
-          <button
-            onClick={() => {
-              // Handle tie
-              console.log('Tie selected');
-            }}
-            disabled={isVoting || !!votedBrandId}
-            className="px-6 py-3 sm:px-8 sm:py-3.5 md:px-10 md:py-4 bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-lg text-milk-tea-darker font-semibold text-base sm:text-lg hover:bg-white/40 hover:border-milk-tea-dark active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg touch-manipulation"
-          >
-            Tie
-          </button>
-          <button
-            onClick={() => {
-              // Handle skip
-              console.log('Skip selected');
-            }}
-            disabled={isVoting || !!votedBrandId}
-            className="px-6 py-3 sm:px-8 sm:py-3.5 md:px-10 md:py-4 bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-lg text-milk-tea-darker font-semibold text-base sm:text-lg hover:bg-white/40 hover:border-milk-tea-dark active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg touch-manipulation"
-          >
-            Skip
-          </button>
+        {/* Tie, Skip Buttons and Local/International Toggle */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mt-6 sm:mt-8 md:mt-10 relative z-20 animate-fade-in-up" style={{ animationDelay: '0.4s', opacity: 0, animationFillMode: 'forwards' }}>
+          <div className="flex gap-3 sm:gap-4">
+            <button
+              onClick={() => {
+                // Handle tie
+                console.log('Tie selected');
+              }}
+              disabled={isVoting || !!votedBrandId}
+              className="px-6 py-3 sm:px-8 sm:py-3.5 md:px-10 md:py-4 bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-lg text-milk-tea-darker font-semibold text-base sm:text-lg hover:bg-white/40 hover:border-milk-tea-dark active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg touch-manipulation"
+            >
+              Tie
+            </button>
+            <button
+              onClick={() => {
+                // Handle skip
+                console.log('Skip selected');
+              }}
+              disabled={isVoting || !!votedBrandId}
+              className="px-6 py-3 sm:px-8 sm:py-3.5 md:px-10 md:py-4 bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-lg text-milk-tea-darker font-semibold text-base sm:text-lg hover:bg-white/40 hover:border-milk-tea-dark active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg touch-manipulation"
+            >
+              Skip
+            </button>
+          </div>
+          
+          {/* Local/International Toggle */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            <span className={`text-sm sm:text-base font-medium transition-colors duration-300 ${!isLocal ? 'text-milk-tea-darker font-semibold' : 'text-milk-tea-dark/60'}`}>
+              International
+            </span>
+            <button
+              onClick={() => {
+                setIsLocal(!isLocal);
+              }}
+              disabled={isDetectingLocation || getFilteredBrands().length < 2}
+              className={`
+                relative w-16 h-8 sm:w-20 sm:h-9 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-milk-tea-dark focus:ring-offset-2
+                ${isLocal 
+                  ? 'bg-milk-tea-medium' 
+                  : 'bg-milk-tea-dark/20'
+                }
+                ${isDetectingLocation || getFilteredBrands().length < 2
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'cursor-pointer hover:opacity-90 active:scale-95'
+                }
+              `}
+              aria-label={isLocal ? 'Switch to international' : 'Switch to local'}
+            >
+              <span
+                className={`
+                  absolute top-0.5 left-0.5 sm:top-0.5 sm:left-0.5 w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-full shadow-lg transform transition-transform duration-300 ease-in-out
+                  ${isLocal ? 'translate-x-8 sm:translate-x-11' : 'translate-x-0'}
+                `}
+              />
+            </button>
+            <span className={`text-sm sm:text-base font-medium transition-colors duration-300 ${isLocal ? 'text-milk-tea-darker font-semibold' : 'text-milk-tea-dark/60'}`}>
+              Local
+            </span>
+          </div>
         </div>
       </div>
 
