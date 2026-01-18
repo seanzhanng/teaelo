@@ -3,12 +3,10 @@ import json
 import time
 from reset_db import nuke_database
 
-# --- CONFIGURATION ---
 BASE_URL = "http://127.0.0.1:8000"
 DISCOVERY_URL = f"{BASE_URL}/discovery/discover"
 MATCH_URL = f"{BASE_URL}/matches/"
 
-# --- RAW GOOGLE DATA ---
 RAW_GOOGLE_DATA = [
     {
         "place_id": "ChIJ-REAL-ALLEY-WATERLOO",
@@ -39,7 +37,6 @@ RAW_GOOGLE_DATA = [
     }
 ]
 
-# --- FRONTEND SIMULATION ---
 def map_google_to_backend(raw_place):
     country = "Unknown"
     city = "Unknown"
@@ -59,36 +56,45 @@ def run_final_test():
     print("\n🧨 STEP 1: Nuking Database...")
     nuke_database()
 
-    # --- PHASE 1: DISCOVERY ---
     print("\n🚀 STEP 2: Discovery & Enrichment...")
     clean_payload = {"places": [map_google_to_backend(p) for p in RAW_GOOGLE_DATA]}
     
     response = requests.post(DISCOVERY_URL, json=clean_payload)
     brands = response.json()
     
-    # Get IDs for the battle
     alley = next(b for b in brands if "The Alley" in b['name'])
     chatime = next(b for b in brands if "Chatime" in b['name'])
     
-    print(f"   ✅ Brands Ready: {alley['name']} vs {chatime['name']}")
+    print(f"   ✅ Brands Found: {len(brands)}")
+    
+    if alley['total_locations'] == 2:
+        print(f"   ✅ LOCATION COUNT: 'The Alley' has 2 locations.")
+    else:
+        print(f"   ❌ FAIL: 'The Alley' count is {alley['total_locations']}")
 
-    # --- PHASE 2: BATTLES (ELO UPDATES) ---
+    if "CA" in alley['regions_present']:
+        print(f"   ✅ REGIONS: 'The Alley' present in {alley['regions_present']}")
+    else:
+        print(f"   ❌ FAIL: Regions missing CA")
+
+    if alley['rank'] is not None:
+         print(f"   ✅ RANK: 'The Alley' is Rank #{alley['rank']}")
+    else:
+         print(f"   ❌ FAIL: Rank is null")
+
     print("\n⚔️  STEP 3: Simulating 2 Matches in Waterloo...")
     
-    # We explicitly define the location here
     city = "Waterloo"
     country = "CA"
 
-    # Battle 1
     match_payload_1 = {
         "winner_id": str(alley['id']), 
         "loser_id": str(chatime['id']),
-        "location_city": city,       # <--- THESE KEYS MUST MATCH SCHEMA
+        "location_city": city,       
         "location_country": country
     }
     requests.post(MATCH_URL, json=match_payload_1)
     
-    # Battle 2
     match_payload_2 = {
         "winner_id": str(alley['id']), 
         "loser_id": str(chatime['id']),
@@ -99,20 +105,20 @@ def run_final_test():
 
     print("   ✅ Matches recorded.")
 
-    # --- PHASE 3: VERIFY ELO ---
     print("\n📊 STEP 4: Verifying Results...")
-    # Refresh data
     response_final = requests.post(DISCOVERY_URL, json=clean_payload)
     brands_final = response_final.json()
     
     alley_final = next(b for b in brands_final if b['id'] == alley['id'])
+    chatime_final = next(b for b in brands_final if b['id'] == chatime['id'])
     
-    print(f"   🏆 {alley_final['name']} ELO: {alley_final['elo']} (Should be > 1200)")
+    print(f"   🏆 {alley_final['name']} ELO: {alley_final['elo']} (Rank #{alley_final['rank']})")
+    print(f"   📉 {chatime_final['name']} ELO: {chatime_final['elo']} (Rank #{chatime_final['rank']})")
     
-    if alley_final['elo'] > 1200:
-        print("   ✅ SUCCESS: System is fully operational.")
+    if alley_final['elo'] > 1200 and alley_final['rank'] < chatime_final['rank']:
+        print("   ✅ SUCCESS: ELO updated and Ranking logic works.")
     else:
-        print("   ❌ FAIL: ELO did not update.")
+        print("   ❌ FAIL: ELO or Ranking logic failed.")
 
 if __name__ == "__main__":
     run_final_test()

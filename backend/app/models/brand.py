@@ -13,13 +13,10 @@ class Brand(SQLModel, table=True):
     logo_url: str | None = None
     country_of_origin: str | None = None
     established_date: date | None = None
-    price_category: int | None = Field(default=None, description="1 to 4 scale")
     total_locations: int | None = 0
     regions_present: List[str] = Field(default_factory=list, sa_column=Column(JSON))
-    countries_active: List[str] = Field(default_factory=list, sa_column=Column(JSON))
     elo: int = Field(default=1200, index=True)
     tier: str = Field(default="Unranked")
-    rank: int | None = None
     wins: int = 0
     losses: int = 0
     ties: int = 0

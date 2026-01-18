@@ -1,6 +1,7 @@
 from sqlmodel import Session, select
 from app.models.brand import Brand
 from app.models.store import StoreLocation
+from app.schemas.brand import BrandRead
 from app.utils.text import clean_brand_name
 from thefuzz import process
 import uuid
@@ -10,7 +11,8 @@ class DiscoveryService:
     def __init__(self, session: Session):
         self.session = session
 
-    def discover_stores(self, google_places: list) -> list[Brand]:
+    # Update return type hint to return the Read Schema
+    def discover_stores(self, google_places: list) -> list[BrandRead]:
         brand_ids = set()
         
         for place in google_places:
@@ -39,34 +41,28 @@ class DiscoveryService:
             if existing_brand:
                 brand = existing_brand
                 
-                # --- UPDATE EXISTING BRAND ---
-                # A. Update Active Countries
-                current_active = brand.countries_active or []
-                if country not in current_active:
-                    brand.countries_active = list(set(current_active + [country]))
+                # Update Regions
+                current_regions = brand.regions_present or []
+                if country not in current_regions:
+                    brand.regions_present = list(set(current_regions + [country]))
                 
-                # B. Increment Location Count (We found a new physical shop!)
                 brand.total_locations = (brand.total_locations or 0) + 1
-                
                 self.session.add(brand)
             else:
-                # 4. CREATE NEW BRAND
+                # Create New Brand
                 brand = Brand(
                     name=cleaned_name,
                     tier="Unranked",
                     elo=1200,
-                    countries_active=[country],
-                    total_locations=1 # Start with 1
+                    regions_present=[country],
+                    total_locations=1 
                 )
-                
-                # --- MOCK AGENT ---
                 self._mock_enrich_brand(brand)
-
                 self.session.add(brand)
                 self.session.commit()
                 self.session.refresh(brand)
 
-            # 5. LINK STORE
+            # Link Store
             new_store = StoreLocation(
                 google_place_id=place_id,
                 brand_id=brand.id,
@@ -78,13 +74,26 @@ class DiscoveryService:
             
             brand_ids.add(brand.id)
 
-        # Return results
-        if not brand_ids:
-            return []
-            
-        results = self.session.exec(
+        # --- RANK CALCULATION & SCHEMA CONVERSION ---
+        # 1. Get the raw DB models
+        db_brands = self.session.exec(
             select(Brand).where(Brand.id.in_(brand_ids))
         ).all()
+        
+        results = []
+        for db_brand in db_brands:
+            # 2. Convert DB Model -> Read Schema (This object has the .rank field)
+            brand_read = BrandRead.model_validate(db_brand)
+            
+            # 3. Calculate Rank dynamically
+            higher_elo_count = self.session.exec(
+                select(Brand).where(Brand.elo > db_brand.elo)
+            ).all()
+            
+            # 4. Assign rank to the Schema object
+            brand_read.rank = len(higher_elo_count) + 1
+            results.append(brand_read)
+            
         return results
 
     def _fuzzy_match_brand(self, name: str, brands: list[Brand]) -> Brand | None:
@@ -95,7 +104,6 @@ class DiscoveryService:
         return None
 
     def _mock_enrich_brand(self, brand: Brand):
-        """Mock Gemini Agent filling in metadata"""
         print(f"🤖 [AGENT] Enriching metadata for: {brand.name}...")
         
         if "Chatime" in brand.name:
@@ -111,8 +119,8 @@ class DiscoveryService:
             brand.country_of_origin = "Taiwan"
             brand.established_date = date(2013, 1, 1)
         else:
-            brand.description = f"A popular local bubble tea spot discovered in {brand.countries_active}."
+            brand.description = f"A popular local spot in {brand.regions_present}."
             brand.website_url = f"https://www.google.com/search?q={brand.name}"
             brand.logo_url = "https://placehold.co/100"
-            brand.country_of_origin = brand.countries_active[0] if brand.countries_active else "Unknown"
+            brand.country_of_origin = brand.regions_present[0] if brand.regions_present else "Unknown"
             brand.established_date = date(2025, 1, 1)

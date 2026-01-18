@@ -10,9 +10,7 @@ class BrandBase(BaseModel):
     logo_url: str | None = None
     country_of_origin: str | None = None
     established_date: date | None = None
-    price_category: int | None = None
     regions_present: list[str] = []
-    countries_active: list[str] = []
     total_locations: int | None = 0 
 
 class BrandCreate(BrandBase):
@@ -24,7 +22,6 @@ class BrandUpdate(BaseModel):
     website_url: Optional[str] = None
     logo_url: Optional[str] = None
     regions_present: Optional[list[str]] = None
-    countries_active: Optional[list[str]] = None
     total_locations: Optional[int] = None
 
 class BrandRead(BrandBase):
