@@ -96,6 +96,7 @@ export default function VotingPage() {
   const [isLocal, setIsLocal] = useState(true);
   const [userCountry, setUserCountry] = useState<string | null>(null);
   const [isDetectingLocation, setIsDetectingLocation] = useState(true);
+  const [roundKey, setRoundKey] = useState(0);
 
   // Detect user's country on mount
   useEffect(() => {
@@ -283,6 +284,7 @@ export default function VotingPage() {
       
       // After a delay, reset the vote state to allow new voting
       setTimeout(() => {
+        setRoundKey((prev) => prev + 1);
         const filtered = getFilteredBrands();
         if (filtered.length >= 2) {
           setBrands(getRandomBrands(filtered));
@@ -302,13 +304,107 @@ export default function VotingPage() {
     }
   };
 
+  const handleTie = async () => {
+    if (isVoting || votedBrandId) return;
+    if (brands.length !== 2) return;
+
+    const [brand1, brand2] = brands;
+
+    // Reveal all cards
+    setRevealedBrandIds(new Set(brands.map((b) => b.id)));
+
+    setIsVoting(true);
+    setVotedBrandId('tie'); // Use a special value to indicate tie
+
+    try {
+      const response = await fetch('/api/vote', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          winnerId: brand1.id,
+          loserId: brand2.id,
+          isTie: true,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Tie vote failed');
+      }
+
+      // Update brands with tie Elo changes (smaller changes for ties)
+      setBrands((prevBrands) => {
+        return prevBrands.map((brand) => {
+          // Both brands get small Elo changes in a tie (typically no change or very small)
+          // For ties, we'll give a small positive change to both
+          return {
+            ...brand,
+            elo: brand.elo + 2, // Small positive change for both in a tie
+            // Rank stays the same in a tie
+          };
+        });
+      });
+
+      console.log('Tie submitted successfully');
+      
+      // After a delay, reset the vote state to allow new voting
+      setTimeout(() => {
+        setRoundKey((prev) => prev + 1);
+        const filtered = getFilteredBrands();
+        if (filtered.length >= 2) {
+          setBrands(getRandomBrands(filtered));
+        } else {
+          setBrands(getRandomBrands(allBrands));
+        }
+        setVotedBrandId(null);
+        setRevealedBrandIds(new Set());
+      }, 2000);
+    } catch (error) {
+      console.error('Error submitting tie:', error);
+      // Reset on error so user can try again
+      setVotedBrandId(null);
+      setRevealedBrandIds(new Set());
+    } finally {
+      setIsVoting(false);
+    }
+  };
+
+  const handleSkip = async () => {
+    if (isVoting || votedBrandId) return;
+    if (brands.length !== 2) return;
+
+    // Reveal all cards
+    setRevealedBrandIds(new Set(brands.map((b) => b.id)));
+
+    setIsVoting(true);
+    setVotedBrandId('skip'); // Use a special value to indicate skip
+
+    // Don't call API, don't change Elo - just reveal and move to next
+    console.log('Skip selected');
+    
+    // After a shorter delay, reset the vote state to allow new voting
+    setTimeout(() => {
+      setRoundKey((prev) => prev + 1);
+      const filtered = getFilteredBrands();
+      if (filtered.length >= 2) {
+        setBrands(getRandomBrands(filtered));
+      } else {
+        setBrands(getRandomBrands(allBrands));
+      }
+      setVotedBrandId(null);
+      setRevealedBrandIds(new Set());
+      setIsVoting(false);
+    }, 1500);
+  };
+
   return (
     <div className="min-h-full w-full relative pt-24 sm:pt-20 md:pt-24 pb-8 md:h-screen md:overflow-hidden">
       <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 w-full py-4 sm:py-6 md:py-8 relative z-10 h-full md:flex md:flex-col md:justify-center">
         {/* Dual Card Layout */}
         <div className="flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-16 lg:gap-24 items-center justify-center w-full relative flex-1 md:min-h-0">
           {brands.map((brand, index) => (
-            <React.Fragment key={brand.id}>
+            <React.Fragment key={`${roundKey}-${brand.id}-${index}`}>
               <div 
                 ref={(el) => {
                   cardRefs.current[brand.id] = el;
@@ -321,7 +417,7 @@ export default function VotingPage() {
                   onClick={(e) => handleVote(brand.id, e)}
                   disabled={isVoting || !!votedBrandId}
                   isRevealed={revealedBrandIds.has(brand.id)}
-                  isSelected={votedBrandId === brand.id}
+                  isSelected={votedBrandId === brand.id || votedBrandId === 'tie'}
                 />
               </div>
               {index === 0 && (
@@ -356,20 +452,14 @@ export default function VotingPage() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mt-6 sm:mt-8 md:mt-10 relative z-20 animate-fade-in-up" style={{ animationDelay: '0.4s', opacity: 0, animationFillMode: 'forwards' }}>
           <div className="flex gap-3 sm:gap-4">
             <button
-              onClick={() => {
-                // Handle tie
-                console.log('Tie selected');
-              }}
+              onClick={handleTie}
               disabled={isVoting || !!votedBrandId}
               className="px-6 py-3 sm:px-8 sm:py-3.5 md:px-10 md:py-4 bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-lg text-milk-tea-darker font-semibold text-base sm:text-lg hover:bg-white/40 hover:border-milk-tea-dark active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg touch-manipulation"
             >
               Tie
             </button>
             <button
-              onClick={() => {
-                // Handle skip
-                console.log('Skip selected');
-              }}
+              onClick={handleSkip}
               disabled={isVoting || !!votedBrandId}
               className="px-6 py-3 sm:px-8 sm:py-3.5 md:px-10 md:py-4 bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-lg text-milk-tea-darker font-semibold text-base sm:text-lg hover:bg-white/40 hover:border-milk-tea-dark active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg touch-manipulation"
             >

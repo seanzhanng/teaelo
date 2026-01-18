@@ -41,14 +41,14 @@ export default async function BrandPage({ params }: PageProps) {
         {/* Mobile: Stacked Layout */}
         <div className="lg:hidden space-y-8">
           {/* Side Card - Mobile */}
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center mt-8 animate-fade-in-scale" style={{ animationDelay: '0.1s', opacity: 0, animationFillMode: 'forwards' }}>
             <BrandCardDisplay {...brandCardData} />
           </div>
 
           {/* Main Content - Mobile */}
           <div className="space-y-8">
             {/* Stats Section */}
-            <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-6 shadow-lg">
+            <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-6 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.2s', opacity: 0, animationFillMode: 'forwards' }}>
               <h2 className="text-xl font-semibold text-milk-tea-darker mb-4">Statistics</h2>
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center">
@@ -67,7 +67,7 @@ export default async function BrandPage({ params }: PageProps) {
             </section>
 
             {/* Trends Section */}
-            <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-6 shadow-lg">
+            <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-6 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.3s', opacity: 0, animationFillMode: 'forwards' }}>
               <h2 className="text-xl font-semibold text-milk-tea-darker mb-4">Trends</h2>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -110,13 +110,13 @@ export default async function BrandPage({ params }: PageProps) {
             </section>
 
             {/* Description */}
-            <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-6 shadow-lg">
+            <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-6 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.4s', opacity: 0, animationFillMode: 'forwards' }}>
               <h2 className="text-xl font-semibold text-milk-tea-darker mb-4">About</h2>
               <p className="text-milk-tea-dark leading-relaxed">{brand.description}</p>
             </section>
 
             {/* Market Presence */}
-            <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-6 shadow-lg">
+            <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-6 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.5s', opacity: 0, animationFillMode: 'forwards' }}>
               <h2 className="text-xl font-semibold text-milk-tea-darker mb-4">Market Presence</h2>
               <div className="space-y-4">
                 <div>
@@ -146,7 +146,7 @@ export default async function BrandPage({ params }: PageProps) {
             </section>
 
             {/* Website Link */}
-            <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-6 shadow-lg">
+            <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-6 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.6s', opacity: 0, animationFillMode: 'forwards' }}>
               <a
                 href={brand.website_url}
                 target="_blank"
@@ -163,7 +163,7 @@ export default async function BrandPage({ params }: PageProps) {
         {/* Desktop: Split View Layout */}
         <div className="hidden lg:flex lg:gap-6 lg:items-stretch">
           {/* Sticky Side Card */}
-          <div className="w-1/3 flex-shrink-0 flex flex-col">
+          <div className="w-1/3 flex-shrink-0 flex flex-col animate-fade-in-scale" style={{ animationDelay: '0.1s', opacity: 0, animationFillMode: 'forwards' }}>
             <BrandCardDisplay {...brandCardData} />
           </div>
 
@@ -171,7 +171,7 @@ export default async function BrandPage({ params }: PageProps) {
           <div className="flex-1">
             <div className="space-y-4">
               {/* Stats Section */}
-              <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-5 shadow-lg">
+              <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-5 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.2s', opacity: 0, animationFillMode: 'forwards' }}>
                 <h2 className="text-xl font-semibold text-milk-tea-darker mb-4">Statistics</h2>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="text-center">
@@ -192,7 +192,7 @@ export default async function BrandPage({ params }: PageProps) {
               {/* Trends and About Side by Side */}
               <div className="grid grid-cols-2 gap-4">
                 {/* Trends Section */}
-                <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-5 shadow-lg">
+                <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-5 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.3s', opacity: 0, animationFillMode: 'forwards' }}>
                   <h2 className="text-xl font-semibold text-milk-tea-darker mb-4">Trends</h2>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between py-2 border-b border-milk-tea-medium/30">
@@ -235,7 +235,7 @@ export default async function BrandPage({ params }: PageProps) {
                 </section>
 
                 {/* Description */}
-                <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-5 shadow-lg">
+                <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-5 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.35s', opacity: 0, animationFillMode: 'forwards' }}>
                   <h2 className="text-xl font-semibold text-milk-tea-darker mb-3">About</h2>
                   <p className="text-sm text-milk-tea-dark leading-relaxed">{brand.description}</p>
                 </section>
@@ -244,7 +244,7 @@ export default async function BrandPage({ params }: PageProps) {
               {/* Market Presence and Regions Side by Side */}
               <div className="grid grid-cols-2 gap-4">
                 {/* Market Presence */}
-                <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-5 shadow-lg">
+                <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-5 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.4s', opacity: 0, animationFillMode: 'forwards' }}>
                   <h2 className="text-xl font-semibold text-milk-tea-darker mb-4">Market Presence</h2>
                   <div className="space-y-3">
                     <div>
@@ -271,7 +271,7 @@ export default async function BrandPage({ params }: PageProps) {
                 </section>
 
                 {/* Regions */}
-                <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-5 shadow-lg">
+                <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-5 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.45s', opacity: 0, animationFillMode: 'forwards' }}>
                   <h2 className="text-xl font-semibold text-milk-tea-darker mb-4">Regions</h2>
                   <div className="flex flex-wrap gap-2">
                     {brand.metadata.regions.map((region) => (

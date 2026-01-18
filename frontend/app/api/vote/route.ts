@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { winnerId, loserId } = body;
+    const { winnerId, loserId, isTie } = body;
 
     // Validate request
     if (!winnerId || !loserId) {
@@ -14,15 +14,20 @@ export async function POST(request: Request) {
     }
 
     // Stub: Log the vote (in production, this would update the database)
-    console.log('Vote received:', { winnerId, loserId });
+    if (isTie) {
+      console.log('Tie vote received:', { winnerId, loserId });
+    } else {
+      console.log('Vote received:', { winnerId, loserId });
+    }
 
     // Return success response
     return NextResponse.json(
       { 
         success: true,
-        message: 'Vote recorded successfully',
+        message: isTie ? 'Tie recorded successfully' : 'Vote recorded successfully',
         winnerId,
         loserId,
+        isTie,
       },
       { status: 200 }
     );
