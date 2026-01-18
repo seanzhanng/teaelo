@@ -168,6 +168,13 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
     setTransform({ rotateX: 0, rotateY: 0, translateZ: 0 });
   };
 
+  // Reset transform when card becomes disabled or is no longer selected
+  useEffect(() => {
+    if (disabled || !isSelected) {
+      setTransform({ rotateX: 0, rotateY: 0, translateZ: 0 });
+    }
+  }, [disabled, isSelected]);
+
   // Use tier color border if revealed or in display mode, otherwise use default
   const shouldUseTierBorder = isRevealed || isDisplayMode;
   const borderColor = shouldUseTierBorder 
@@ -185,12 +192,12 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className={`
-        relative w-full max-w-xs sm:max-w-sm mx-auto
+        relative w-full max-w-[280px] sm:max-w-xs md:max-w-sm mx-auto
         bg-white/30 backdrop-blur-md
         border-2 ${borderColor}
-        p-4 sm:p-6 md:p-8 rounded-xl
+        p-3 sm:p-4 md:p-6 lg:p-8 rounded-xl
         transition-all duration-300 ease-out
-        ${isSelected ? 'scale-105 shadow-2xl translate-y-[-20px]' : 'shadow-lg'}
+        ${isSelected ? 'scale-[1.02] sm:scale-105 shadow-2xl translate-y-[-5px] sm:translate-y-[-10px] md:translate-y-[-20px] z-40' : 'shadow-lg z-10'}
         ${isRevealed && !isSelected && !isDisplayMode ? 'opacity-40 grayscale' : ''}
         ${hoverBorderColor} hover:shadow-xl
         active:scale-[0.98]
@@ -206,9 +213,9 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
       {/* Glint Animation - Full card sweep */}
       <div className="card-glint absolute inset-0 pointer-events-none z-10" />
       {/* Logo */}
-      <div className="flex justify-center mb-2 sm:mb-3 md:mb-4 relative z-20">
+      <div className="flex justify-center mb-1.5 sm:mb-2 md:mb-3 lg:mb-4 relative z-20">
         {brand.logo_url ? (
-          <div className="relative w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48">
+          <div className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48">
             <Image
               src={brand.logo_url}
               alt={`${brand.name} logo`}
@@ -221,8 +228,8 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
             />
           </div>
         ) : (
-          <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 bg-milk-tea-medium rounded-lg flex items-center justify-center">
-            <span className="text-4xl sm:text-5xl md:text-6xl font-bold text-milk-tea-dark">
+          <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 bg-milk-tea-medium rounded-lg flex items-center justify-center">
+            <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-milk-tea-dark">
               {brand.name.charAt(0)}
             </span>
           </div>
@@ -230,23 +237,23 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
       </div>
 
       {/* Brand Name */}
-      <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-1 sm:mb-2 relative z-20" style={{ color: 'var(--milk-tea-darker)' }}>
+      <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-center mb-1 sm:mb-2 relative z-20" style={{ color: 'var(--milk-tea-darker)' }}>
         {brand.name}
       </h3>
 
       {/* Price Indicator */}
       {brand.price && (
-        <div className="flex justify-center mb-2 sm:mb-3 md:mb-4 relative z-20">
-          <div className="text-milk-tea-dark font-semibold text-base sm:text-lg md:text-xl">
+        <div className="flex justify-center mb-1.5 sm:mb-2 md:mb-3 lg:mb-4 relative z-20">
+          <div className="text-milk-tea-dark font-semibold text-sm sm:text-base md:text-lg lg:text-xl">
             {'$'.repeat(brand.price)}
           </div>
         </div>
       )}
 
       {/* Tier Badge */}
-      <div className="flex justify-center mb-2 sm:mb-3 md:mb-4 relative z-20">
+      <div className="flex justify-center mb-1.5 sm:mb-2 md:mb-3 lg:mb-4 relative z-20">
         <span
-          className={`px-3 py-1 sm:px-4 sm:py-2 rounded text-xs sm:text-sm font-semibold transition-opacity ${
+          className={`px-2 py-0.5 sm:px-3 sm:py-1 md:px-4 md:py-2 rounded text-xs sm:text-sm font-semibold transition-opacity ${
             isRevealed 
               ? tierColors[brand.tier] 
               : 'bg-gray-300 text-gray-500 opacity-60'
@@ -257,18 +264,18 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6 mt-2 sm:mt-3 mb-2 sm:mb-3 relative z-20">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 lg:gap-6 mt-1.5 sm:mt-2 md:mt-3 mb-1.5 sm:mb-2 md:mb-3 relative z-20">
         <div className="text-center">
-          <div className="text-xs sm:text-sm text-milk-tea-dark mb-1 sm:mb-2">Elo</div>
-          <div className="flex items-center justify-center gap-1 sm:gap-2">
-            <div className={`text-lg sm:text-xl md:text-2xl font-bold transition-opacity ${
+          <div className="text-xs text-milk-tea-dark mb-0.5 sm:mb-1 md:mb-2">Elo</div>
+          <div className="flex items-center justify-center gap-0.5 sm:gap-1 md:gap-2">
+            <div className={`text-base sm:text-lg md:text-xl lg:text-2xl font-bold transition-opacity ${
               isRevealed ? 'text-milk-tea-darker' : 'text-gray-400 opacity-60'
             }`}>
               {isRevealed ? Math.round(animatedElo) : (randomElo || Math.round(brand.elo))}
             </div>
             {eloChange !== null && (
               <span
-                className={`text-sm sm:text-base md:text-lg font-semibold transition-opacity duration-300 ${
+                className={`text-xs sm:text-sm md:text-base lg:text-lg font-semibold transition-opacity duration-300 ${
                   eloChange > 0 ? 'text-green-600' : 'text-red-600'
                 }`}
                 style={{
@@ -281,16 +288,16 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
           </div>
         </div>
         <div className="text-center">
-          <div className="text-xs sm:text-sm text-milk-tea-dark mb-1 sm:mb-2">Rank</div>
-          <div className="flex items-center justify-center gap-1 sm:gap-2">
-            <div className={`text-lg sm:text-xl md:text-2xl font-bold transition-opacity ${
+          <div className="text-xs text-milk-tea-dark mb-0.5 sm:mb-1 md:mb-2">Rank</div>
+          <div className="flex items-center justify-center gap-0.5 sm:gap-1 md:gap-2">
+            <div className={`text-base sm:text-lg md:text-xl lg:text-2xl font-bold transition-opacity ${
               isRevealed ? 'text-milk-tea-darker' : 'text-gray-400 opacity-60'
             }`}>
               {isRevealed ? `#${brand.rank}` : `#${randomRank || brand.rank}`}
             </div>
             {rankChange !== null && rankChange !== 0 && (
               <span
-                className={`text-sm sm:text-base md:text-lg font-semibold transition-opacity duration-300 ${
+                className={`text-xs sm:text-sm md:text-base lg:text-lg font-semibold transition-opacity duration-300 ${
                   rankChange < 0 ? 'text-green-600' : 'text-red-600'
                 }`}
                 style={{
@@ -305,7 +312,7 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
       </div>
 
       {/* Country and Established Date */}
-      <div className="text-center mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-milk-tea-medium space-y-1 sm:space-y-2 relative z-20">
+      <div className="text-center mt-1.5 sm:mt-2 md:mt-3 pt-1.5 sm:pt-2 md:pt-3 border-t border-milk-tea-medium space-y-0.5 sm:space-y-1 md:space-y-2 relative z-20">
         <div className="text-xs sm:text-sm text-milk-tea-dark">
           Origin: {brand.country_of_origin}
         </div>

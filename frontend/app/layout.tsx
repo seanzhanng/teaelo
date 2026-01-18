@@ -22,13 +22,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full overflow-hidden">
+    <html lang="en" className="h-full">
       <body
-        className={`${fredoka.variable} antialiased h-full flex flex-col overflow-hidden`}
+        className={`${fredoka.variable} antialiased h-full flex flex-col`}
       >
         <BackgroundBlobs />
         <Navigation />
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden">
           {children}
         </main>
         <FlowingLiquid />

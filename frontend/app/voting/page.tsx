@@ -63,6 +63,7 @@ export default function VotingPage() {
   const [particles, setParticles] = useState<EmojiParticle[]>([]);
   const animationFrameRef = useRef<number | undefined>(undefined);
   const particlesRef = useRef<EmojiParticle[]>([]);
+  const cardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   // Update particles ref when particles state changes
   useEffect(() => {
@@ -154,6 +155,14 @@ export default function VotingPage() {
     setIsVoting(true);
     setVotedBrandId(winnerId);
 
+    // Scroll selected card into view on mobile to prevent it from going behind header
+    setTimeout(() => {
+      const cardElement = cardRefs.current[winnerId];
+      if (cardElement) {
+        cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+
     try {
       const response = await fetch('/api/vote', {
         method: 'POST',
@@ -196,23 +205,37 @@ export default function VotingPage() {
       });
 
       console.log('Vote submitted successfully');
+      
+      // After a delay, reset the vote state to allow new voting
+      setTimeout(() => {
+        setBrands(getRandomBrands());
+        setVotedBrandId(null);
+        setRevealedBrandIds(new Set());
+      }, 2000);
     } catch (error) {
       console.error('Error submitting vote:', error);
       // Reset on error so user can try again
       setVotedBrandId(null);
+      setRevealedBrandIds(new Set());
     } finally {
       setIsVoting(false);
     }
   };
 
   return (
-    <div className="min-h-screen overflow-y-auto overflow-x-hidden relative pt-16 sm:pt-20 pb-8">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 w-full py-4 sm:py-6 md:py-8 relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-4rem)]">
+    <div className="min-h-full w-full relative pt-24 sm:pt-20 pb-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 w-full py-4 sm:py-6 md:py-8 relative z-10">
         {/* Dual Card Layout */}
-        <div className="flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-12 lg:gap-16 items-center justify-center max-w-4xl mx-auto relative">
+        <div className="flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-12 lg:gap-16 items-center justify-center max-w-4xl mx-auto relative min-h-[calc(100vh-12rem)] md:min-h-[calc(100vh-16rem)]">
           {brands.map((brand, index) => (
             <React.Fragment key={brand.id}>
-              <div className={`flex-1 flex justify-center w-full max-w-xs sm:max-w-sm md:max-w-none animate-fade-in-scale`} style={{ animationDelay: `${index * 0.15}s`, opacity: 0, animationFillMode: 'forwards' }}>
+              <div 
+                ref={(el) => {
+                  cardRefs.current[brand.id] = el;
+                }}
+                className={`flex-1 flex justify-center w-full max-w-[280px] sm:max-w-xs md:max-w-sm lg:max-w-none animate-fade-in-scale`} 
+                style={{ animationDelay: `${index * 0.15}s`, opacity: 0, animationFillMode: 'forwards' }}
+              >
                 <BrandCard
                   brand={brand}
                   onClick={(e) => handleVote(brand.id, e)}
@@ -224,9 +247,13 @@ export default function VotingPage() {
               {index === 0 && (
                 <>
                   {/* Mobile VS Indicator */}
-                  <div className="md:hidden flex items-center justify-center my-2 z-30">
-                    <div className="bg-white/60 backdrop-blur-sm border-2 border-milk-tea-medium rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
-                      <span className="text-milk-tea-darker font-bold text-base">VS</span>
+                  <div className="md:hidden flex items-center justify-center my-2 z-30 w-full">
+                    <div className="flex items-center gap-2 w-full max-w-xs">
+                      <div className="h-px flex-1 bg-milk-tea-medium"></div>
+                      <div className="bg-white/60 backdrop-blur-sm border-2 border-milk-tea-medium rounded-full w-12 h-12 flex items-center justify-center shadow-lg flex-shrink-0">
+                        <span className="text-milk-tea-darker font-bold text-base">VS</span>
+                      </div>
+                      <div className="h-px flex-1 bg-milk-tea-medium"></div>
                     </div>
                   </div>
                   {/* Desktop VS Indicator */}
