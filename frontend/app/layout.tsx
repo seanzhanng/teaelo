@@ -12,8 +12,8 @@ const fredoka = Fredoka({
 });
 
 export const metadata: Metadata = {
-  title: "Teaelo - Rank Global Boba Chains",
-  description: "A high-authority, minimalist platform for ranking global boba chains using an Elo-based A/B voting system.",
+  title: "TeaElo - Rank Global Boba Chains",
+  description: "A platform for ranking global boba chains using an Elo-based A/B voting system.",
 };
 
 export default function RootLayout({
