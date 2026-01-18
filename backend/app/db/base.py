@@ -1,2 +1,2 @@
 from sqlmodel import SQLModel
-from app.models.brand import Brand
+from app.models import Brand, Match, StoreLocation

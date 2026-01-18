@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import brands, matches
+from app.routers import brands, matches, discovery
 
 app = FastAPI(title="Teaelo API")
 
@@ -22,7 +22,4 @@ app.add_middleware(
 
 app.include_router(brands.router, prefix="/brands", tags=["Brands"])
 app.include_router(matches.router, prefix="/matches", tags=["Matches"])
-
-@app.get("/")
-def root():
-    return {"message": "Welcome to Teaelo!"}
+app.include_router(discovery.router, prefix="/discovery", tags=["Discovery"])
