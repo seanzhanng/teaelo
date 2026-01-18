@@ -1,14 +1,24 @@
-from sqlmodel import Session, select, col
+from sqlmodel import Session, select, col, func
 from fastapi import HTTPException
 import uuid
-from sqlalchemy.sql.expression import func
 
 from app.models.brand import Brand
-from app.schemas.brand import BrandCreate, BrandUpdate
+from app.schemas.brand import BrandCreate, BrandUpdate, BrandRead
 
 class BrandService:
     def __init__(self, session: Session):
         self.session = session
+
+    def _populate_rank(self, brand_read: BrandRead) -> BrandRead:
+        """
+        Calculates the Global Rank for a single brand by counting 
+        how many brands have a higher ELO.
+        """
+        higher_elo_count = self.session.exec(
+            select(func.count()).select_from(Brand).where(Brand.elo > brand_read.elo)
+        ).one()
+        brand_read.rank = higher_elo_count + 1
+        return brand_read
 
     def create(self, brand_data: BrandCreate) -> Brand:
         brand_db = Brand.model_validate(brand_data)
@@ -16,14 +26,17 @@ class BrandService:
         self.session.commit()
         return brand_db
 
-    def get_by_id(self, brand_id: uuid.UUID) -> Brand:
+    def get_by_id(self, brand_id: uuid.UUID) -> BrandRead:
         brand = self.session.get(Brand, brand_id)
         if not brand:
             raise HTTPException(status_code=404, detail="Brand not found")
-        return brand
+        
+        return self._populate_rank(BrandRead.model_validate(brand))
 
     def update(self, brand_id: uuid.UUID, brand_data: BrandUpdate) -> Brand:
-        brand = self.get_by_id(brand_id)
+        brand = self.session.get(Brand, brand_id)
+        if not brand:
+            raise HTTPException(status_code=404, detail="Brand not found")
         
         update_data = brand_data.model_dump(exclude_unset=True)
         for key, value in update_data.items():
@@ -34,36 +47,46 @@ class BrandService:
         return brand
 
     def delete(self, brand_id: uuid.UUID) -> None:
-        brand = self.get_by_id(brand_id)
-        self.session.delete(brand)
-        self.session.commit()
+        brand = self.session.get(Brand, brand_id)
+        if brand:
+            self.session.delete(brand)
+            self.session.commit()
     
-    def get_random_pair(self, country_code: str | None = None) -> list[Brand]:
+    def get_random_pair(self, country_code: str | None = None) -> list[BrandRead]:
         statement = select(Brand).order_by(func.random())
         
+        candidates = []
         if country_code:
-            candidates = self.session.exec(statement.limit(50)).all()
+            raw_candidates = self.session.exec(statement.limit(50)).all()
             
             filtered = [
-                b for b in candidates 
-                if country_code in b.countries_active or "Global" in b.regions_present
+                b for b in raw_candidates 
+                if country_code in (b.regions_present or []) or "Global" in (b.regions_present or [])
             ]
+            candidates = filtered[:2] if len(filtered) >= 2 else raw_candidates[:2]
+        else:
+            candidates = self.session.exec(statement.limit(2)).all()
             
-            if len(filtered) < 2:
-                return candidates[:2] if len(candidates) >= 2 else []
-                
-            return filtered[:2]
-
-        return self.session.exec(statement.limit(2)).all()
+        return [self._populate_rank(BrandRead.model_validate(b)) for b in candidates]
     
-    def get_leaderboard(self, limit: int = 50, offset: int = 0) -> list[Brand]:
+    def get_leaderboard(self, limit: int = 50, offset: int = 0) -> list[BrandRead]:
         statement = select(Brand).order_by(Brand.elo.desc()).offset(offset).limit(limit)
-        return self.session.exec(statement).all()
+        brands = self.session.exec(statement).all()
+        
+        results = []
+        for index, brand in enumerate(brands):
+            b_read = BrandRead.model_validate(brand)
+            b_read.rank = offset + index + 1
+            results.append(b_read)
+            
+        return results
 
-    def get_all(self, search: str | None = None, limit: int = 100, offset: int = 0) -> list[Brand]:
+    def get_all(self, search: str | None = None, limit: int = 100, offset: int = 0) -> list[BrandRead]:
         statement = select(Brand)
         
         if search:
             statement = statement.where(col(Brand.name).ilike(f"%{search}%"))
             
-        return self.session.exec(statement.offset(offset).limit(limit)).all()
+        brands = self.session.exec(statement.offset(offset).limit(limit)).all()
+        
+        return [self._populate_rank(BrandRead.model_validate(b)) for b in brands]
