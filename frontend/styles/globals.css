@@ -1,26 +1,308 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Milk-tea color scheme - clean milk tea background */
+  --background: #ebddd0;
+  --foreground: #432f26;
+  --milk-tea-light: #ebddd0;
+  --milk-tea-medium: #d4c4b0;
+  --milk-tea-dark: #432f26;
+  --milk-tea-darker: #3f221c;
+  --accent: #3f221c;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-milk-tea-light: var(--milk-tea-light);
+  --color-milk-tea-medium: var(--milk-tea-medium);
+  --color-milk-tea-dark: var(--milk-tea-dark);
+  --color-milk-tea-darker: var(--milk-tea-darker);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-fredoka);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html, body {
+  overflow: hidden;
+  height: 100%;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-fredoka), sans-serif;
 }
+
+@keyframes waveMarqueeLeft {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes waveMarqueeRight {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.wave-track {
+  display: flex;
+  width: 200vw;
+  height: 100%;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.wave-track--left {
+  animation: waveMarqueeLeft 20s linear infinite;
+}
+
+.wave-track--right {
+  animation: waveMarqueeRight 25s linear infinite;
+}
+
+@keyframes glint {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(200%) translateY(200%) rotate(45deg);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Animation utility classes */
+.animate-slide-down {
+  animation: slideDown 0.5s ease-out;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale 0.5s ease-out;
+}
+
+.animate-delay-100 {
+  animation-delay: 0.1s;
+  opacity: 0;
+  animation-fill-mode: forwards;
+}
+
+.animate-delay-200 {
+  animation-delay: 0.2s;
+  opacity: 0;
+  animation-fill-mode: forwards;
+}
+
+.animate-delay-300 {
+  animation-delay: 0.3s;
+  opacity: 0;
+  animation-fill-mode: forwards;
+}
+
+.animate-delay-400 {
+  animation-delay: 0.4s;
+  opacity: 0;
+  animation-fill-mode: forwards;
+}
+
+@keyframes blobMorph1 {
+  0%, 100% {
+    clip-path: polygon(20% 0%, 80% 0%, 100% 40%, 85% 70%, 50% 100%, 15% 80%, 0% 50%);
+  }
+  33% {
+    clip-path: polygon(25% 5%, 75% 10%, 95% 35%, 90% 65%, 70% 90%, 30% 95%, 10% 70%);
+  }
+  66% {
+    clip-path: polygon(15% 10%, 85% 5%, 100% 45%, 80% 75%, 45% 95%, 20% 85%, 0% 30%);
+  }
+}
+
+@keyframes blobMorph2 {
+  0%, 100% {
+    clip-path: polygon(30% 10%, 90% 5%, 100% 50%, 75% 95%, 25% 100%, 0% 60%, 5% 30%);
+  }
+  33% {
+    clip-path: polygon(35% 15%, 85% 10%, 95% 45%, 80% 90%, 30% 95%, 5% 55%, 10% 35%);
+  }
+  66% {
+    clip-path: polygon(25% 5%, 95% 0%, 100% 55%, 70% 100%, 20% 100%, 0% 65%, 0% 25%);
+  }
+}
+
+@keyframes blobMorph3 {
+  0%, 100% {
+    clip-path: polygon(10% 15%, 85% 10%, 95% 45%, 80% 80%, 40% 95%, 5% 70%, 0% 35%);
+  }
+  33% {
+    clip-path: polygon(15% 20%, 80% 15%, 90% 50%, 85% 85%, 45% 90%, 10% 75%, 5% 40%);
+  }
+  66% {
+    clip-path: polygon(5% 10%, 90% 5%, 100% 50%, 75% 90%, 35% 100%, 0% 65%, 0% 30%);
+  }
+}
+
+@keyframes blobMorph4 {
+  0%, 100% {
+    clip-path: polygon(25% 5%, 75% 0%, 100% 35%, 90% 75%, 60% 100%, 20% 90%, 0% 55%);
+  }
+  33% {
+    clip-path: polygon(30% 10%, 70% 5%, 95% 40%, 85% 80%, 65% 95%, 25% 85%, 5% 60%);
+  }
+  66% {
+    clip-path: polygon(20% 0%, 80% 5%, 100% 30%, 95% 70%, 55% 100%, 15% 95%, 0% 50%);
+  }
+}
+
+@keyframes blobMorph5 {
+  0%, 100% {
+    clip-path: polygon(15% 20%, 80% 15%, 95% 50%, 70% 85%, 30% 90%, 5% 60%, 0% 30%);
+  }
+  33% {
+    clip-path: polygon(20% 25%, 75% 20%, 90% 55%, 75% 90%, 35% 85%, 10% 65%, 5% 35%);
+  }
+  66% {
+    clip-path: polygon(10% 15%, 85% 10%, 100% 45%, 65% 95%, 25% 95%, 0% 55%, 0% 25%);
+  }
+}
+
+@keyframes blobMorph6 {
+  0%, 100% {
+    clip-path: polygon(20% 10%, 90% 5%, 100% 40%, 85% 75%, 45% 95%, 10% 80%, 0% 45%);
+  }
+  33% {
+    clip-path: polygon(25% 15%, 85% 10%, 95% 45%, 90% 80%, 50% 90%, 15% 85%, 5% 50%);
+  }
+  66% {
+    clip-path: polygon(15% 5%, 95% 0%, 100% 35%, 80% 85%, 40% 100%, 5% 75%, 0% 40%);
+  }
+}
+
+@keyframes blobMorph7 {
+  0%, 100% {
+    clip-path: polygon(30% 0%, 70% 5%, 95% 40%, 80% 80%, 50% 100%, 15% 85%, 0% 50%);
+  }
+  33% {
+    clip-path: polygon(35% 5%, 65% 10%, 90% 45%, 85% 85%, 55% 95%, 20% 90%, 5% 55%);
+  }
+  66% {
+    clip-path: polygon(25% 0%, 75% 0%, 100% 35%, 75% 90%, 45% 100%, 10% 80%, 0% 45%);
+  }
+}
+
+@keyframes blobFloat {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  33% {
+    transform: translate(20px, -15px);
+  }
+  66% {
+    transform: translate(-15px, 20px);
+  }
+}
+
+.blob-animation {
+  animation-fill-mode: both;
+}
+
+.card-glint {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 45%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0.3) 55%,
+    transparent 100%
+  );
+  width: 150%;
+  height: 150%;
+  top: -25%;
+  left: -25%;
+  animation: glint 3s ease-in-out infinite;
+  animation-delay: 0.5s;
+  z-index: 1;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(10px);
+  }
+}
+
+@keyframes arrowBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+.animate-arrow-bounce {
+  animation: arrowBounce 2s ease-in-out infinite;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
