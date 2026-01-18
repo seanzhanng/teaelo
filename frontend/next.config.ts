@@ -5,19 +5,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'via.placeholder.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'static1.squarespace.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'gong-cha-usa.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'www.scrapehero.com',
+        hostname: '**', // Allows all HTTPS domains
+        // Note: This is safe since image URLs come from controlled mockData, not user input
       },
     ],
   },

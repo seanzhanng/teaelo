@@ -21,18 +21,37 @@ interface BrandCardProps {
   disabled?: boolean;
   isRevealed?: boolean;
   isSelected?: boolean;
+  isDisplayMode?: boolean; // Prevents graying out when in display mode
 }
 
 const tierColors: Record<Brand['tier'], string> = {
-  S: 'bg-purple-600 text-white',
-  A: 'bg-blue-600 text-white',
+  S: 'bg-amber-500 text-white',
+  A: 'bg-purple-600 text-white',
   B: 'bg-green-600 text-white',
   C: 'bg-yellow-600 text-white',
   D: 'bg-orange-600 text-white',
   F: 'bg-red-600 text-white',
 };
 
-export default function BrandCard({ brand, onClick, disabled = false, isRevealed = false, isSelected = false }: BrandCardProps) {
+const tierBorderColors: Record<Brand['tier'], string> = {
+  S: 'border-amber-500',
+  A: 'border-purple-600',
+  B: 'border-green-600',
+  C: 'border-yellow-600',
+  D: 'border-orange-600',
+  F: 'border-red-600',
+};
+
+const tierBorderHoverColors: Record<Brand['tier'], string> = {
+  S: 'hover:border-amber-600',
+  A: 'hover:border-purple-700',
+  B: 'hover:border-green-700',
+  C: 'hover:border-yellow-700',
+  D: 'hover:border-orange-700',
+  F: 'hover:border-red-700',
+};
+
+export default function BrandCard({ brand, onClick, disabled = false, isRevealed = false, isSelected = false, isDisplayMode = false }: BrandCardProps) {
   const [transform, setTransform] = useState({ rotateX: 0, rotateY: 0, translateZ: 0 });
   // Initialize with fixed values to avoid hydration mismatch, then set random values on client
   const [randomElo, setRandomElo] = useState(0);
@@ -149,6 +168,15 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
     setTransform({ rotateX: 0, rotateY: 0, translateZ: 0 });
   };
 
+  // Use tier color border if revealed or in display mode, otherwise use default
+  const shouldUseTierBorder = isRevealed || isDisplayMode;
+  const borderColor = shouldUseTierBorder 
+    ? tierBorderColors[brand.tier] 
+    : 'border-milk-tea-medium';
+  const hoverBorderColor = shouldUseTierBorder
+    ? tierBorderHoverColors[brand.tier]
+    : 'hover:border-milk-tea-dark';
+
   return (
     <button
       ref={cardRef}
@@ -157,16 +185,16 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className={`
-        relative w-full max-w-md mx-auto
+        relative w-full max-w-xs sm:max-w-sm mx-auto
         bg-white/30 backdrop-blur-md
-        border-2 ${isSelected ? 'border-milk-tea-dark' : 'border-milk-tea-medium'}
-        p-10 rounded-xl
+        border-2 ${borderColor}
+        p-4 sm:p-6 md:p-8 rounded-xl
         transition-all duration-300 ease-out
         ${isSelected ? 'scale-105 shadow-2xl translate-y-[-20px]' : 'shadow-lg'}
-        ${isRevealed && !isSelected ? 'opacity-40 grayscale' : ''}
-        hover:border-milk-tea-dark hover:shadow-xl
+        ${isRevealed && !isSelected && !isDisplayMode ? 'opacity-40 grayscale' : ''}
+        ${hoverBorderColor} hover:shadow-xl
         active:scale-[0.98]
-        disabled:cursor-not-allowed disabled:hover:border-milk-tea-medium
+        disabled:cursor-not-allowed ${disabled && !shouldUseTierBorder ? 'disabled:hover:border-milk-tea-medium' : ''}
         focus:outline-none focus:ring-2 focus:ring-milk-tea-dark focus:ring-offset-2
         overflow-hidden
       `}
@@ -178,9 +206,9 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
       {/* Glint Animation - Full card sweep */}
       <div className="card-glint absolute inset-0 pointer-events-none z-10" />
       {/* Logo */}
-      <div className="flex justify-center mb-4 relative z-20">
+      <div className="flex justify-center mb-2 sm:mb-3 md:mb-4 relative z-20">
         {brand.logo_url ? (
-          <div className="relative w-64 h-64">
+          <div className="relative w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48">
             <Image
               src={brand.logo_url}
               alt={`${brand.name} logo`}
@@ -193,8 +221,8 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
             />
           </div>
         ) : (
-          <div className="w-64 h-64 bg-milk-tea-medium rounded-lg flex items-center justify-center">
-            <span className="text-6xl font-bold text-milk-tea-dark">
+          <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 bg-milk-tea-medium rounded-lg flex items-center justify-center">
+            <span className="text-4xl sm:text-5xl md:text-6xl font-bold text-milk-tea-dark">
               {brand.name.charAt(0)}
             </span>
           </div>
@@ -202,23 +230,23 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
       </div>
 
       {/* Brand Name */}
-      <h3 className="text-3xl font-semibold text-center mb-2 relative z-20" style={{ color: 'var(--milk-tea-darker)' }}>
+      <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-1 sm:mb-2 relative z-20" style={{ color: 'var(--milk-tea-darker)' }}>
         {brand.name}
       </h3>
 
       {/* Price Indicator */}
       {brand.price && (
-        <div className="flex justify-center mb-4 relative z-20">
-          <div className="text-milk-tea-dark font-semibold text-xl">
+        <div className="flex justify-center mb-2 sm:mb-3 md:mb-4 relative z-20">
+          <div className="text-milk-tea-dark font-semibold text-base sm:text-lg md:text-xl">
             {'$'.repeat(brand.price)}
           </div>
         </div>
       )}
 
       {/* Tier Badge */}
-      <div className="flex justify-center mb-4 relative z-20">
+      <div className="flex justify-center mb-2 sm:mb-3 md:mb-4 relative z-20">
         <span
-          className={`px-4 py-2 rounded text-sm font-semibold transition-opacity ${
+          className={`px-3 py-1 sm:px-4 sm:py-2 rounded text-xs sm:text-sm font-semibold transition-opacity ${
             isRevealed 
               ? tierColors[brand.tier] 
               : 'bg-gray-300 text-gray-500 opacity-60'
@@ -229,18 +257,18 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-6 mt-3 mb-3 relative z-20">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6 mt-2 sm:mt-3 mb-2 sm:mb-3 relative z-20">
         <div className="text-center">
-          <div className="text-sm text-milk-tea-dark mb-2">Elo</div>
-          <div className="flex items-center justify-center gap-2">
-            <div className={`text-2xl font-bold transition-opacity ${
+          <div className="text-xs sm:text-sm text-milk-tea-dark mb-1 sm:mb-2">Elo</div>
+          <div className="flex items-center justify-center gap-1 sm:gap-2">
+            <div className={`text-lg sm:text-xl md:text-2xl font-bold transition-opacity ${
               isRevealed ? 'text-milk-tea-darker' : 'text-gray-400 opacity-60'
             }`}>
               {isRevealed ? Math.round(animatedElo) : (randomElo || Math.round(brand.elo))}
             </div>
             {eloChange !== null && (
               <span
-                className={`text-lg font-semibold transition-opacity duration-300 ${
+                className={`text-sm sm:text-base md:text-lg font-semibold transition-opacity duration-300 ${
                   eloChange > 0 ? 'text-green-600' : 'text-red-600'
                 }`}
                 style={{
@@ -253,16 +281,16 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
           </div>
         </div>
         <div className="text-center">
-          <div className="text-sm text-milk-tea-dark mb-2">Rank</div>
-          <div className="flex items-center justify-center gap-2">
-            <div className={`text-2xl font-bold transition-opacity ${
+          <div className="text-xs sm:text-sm text-milk-tea-dark mb-1 sm:mb-2">Rank</div>
+          <div className="flex items-center justify-center gap-1 sm:gap-2">
+            <div className={`text-lg sm:text-xl md:text-2xl font-bold transition-opacity ${
               isRevealed ? 'text-milk-tea-darker' : 'text-gray-400 opacity-60'
             }`}>
               {isRevealed ? `#${brand.rank}` : `#${randomRank || brand.rank}`}
             </div>
             {rankChange !== null && rankChange !== 0 && (
               <span
-                className={`text-lg font-semibold transition-opacity duration-300 ${
+                className={`text-sm sm:text-base md:text-lg font-semibold transition-opacity duration-300 ${
                   rankChange < 0 ? 'text-green-600' : 'text-red-600'
                 }`}
                 style={{
@@ -277,8 +305,8 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
       </div>
 
       {/* Country and Established Date */}
-      <div className="text-center mt-3 pt-3 border-t border-milk-tea-medium space-y-2 relative z-20">
-        <div className="text-sm text-milk-tea-dark">
+      <div className="text-center mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-milk-tea-medium space-y-1 sm:space-y-2 relative z-20">
+        <div className="text-xs sm:text-sm text-milk-tea-dark">
           Origin: {brand.country_of_origin}
         </div>
         {brand.established_date && (

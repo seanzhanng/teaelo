@@ -28,7 +28,7 @@ export default function RootLayout({
       >
         <BackgroundBlobs />
         <Navigation />
-        <main className="flex-1 overflow-hidden pt-20">
+        <main className="flex-1 overflow-hidden">
           {children}
         </main>
         <FlowingLiquid />

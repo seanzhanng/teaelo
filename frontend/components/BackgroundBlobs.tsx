@@ -20,13 +20,12 @@ export default function BackgroundBlobs() {
       {backgroundShapes.map((shape, index) => (
         <div
           key={index}
-          className="fixed pointer-events-none z-0"
+          className="fixed pointer-events-none z-0 blob-animation"
           style={{
             top: shape.top,
             left: shape.left,
             width: shape.width,
             height: shape.height,
-            clipPath: shape.clipPath,
             background: `radial-gradient(ellipse at center, rgba(180, 160, 140, ${shape.opacity}) 0%, rgba(180, 160, 140, ${shape.opacity * 0.6}) 50%, transparent 100%)`,
             filter: 'blur(80px)',
             animation: `${shape.morphAnimation} ${15 + index * 2}s cubic-bezier(0.4, 0, 0.2, 1) infinite ${shape.morphDelay}, blobFloat ${20 + index * 3}s ease-in-out infinite ${shape.floatDelay}`,
