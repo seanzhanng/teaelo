@@ -11,6 +11,7 @@ class Match(SQLModel, table=True):
     winner_elo_after: int
     loser_elo_before: int
     loser_elo_after: int
+    is_tie: bool = Field(default=False)    
     location_country: str | None = None
     location_city: str | None = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)

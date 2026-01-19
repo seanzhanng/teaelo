@@ -10,48 +10,67 @@ class MatchService:
         self.session = session
 
     def record_match(self, match_data: MatchCreate) -> MatchResult:
-        winner = self.session.get(Brand, match_data.winner_id)
-        loser = self.session.get(Brand, match_data.loser_id)
+        brand_a = self.session.get(Brand, match_data.winner_id)
+        brand_b = self.session.get(Brand, match_data.loser_id)
 
-        if not winner or not loser:
-            raise HTTPException(status_code=404, detail="One or both brands not found")
+        if not brand_a or not brand_b:
+            raise HTTPException(status_code=404, detail="Brand not found")
 
-        if winner.id == loser.id:
-            raise HTTPException(status_code=400, detail="A brand cannot fight itself")
+        if brand_a.id == brand_b.id:
+            raise HTTPException(status_code=400, detail="Cannot fight itself")
 
-        new_winner_elo, new_loser_elo = calculate_new_ratings(winner.elo, loser.elo)
-        winner_diff = new_winner_elo - winner.elo
-        loser_diff = new_loser_elo - loser.elo
+        # 1. Calculate Total Matches for Dynamic K
+        matches_a = brand_a.wins + brand_a.losses + brand_a.ties
+        matches_b = brand_b.wins + brand_b.losses + brand_b.ties
 
+        # 2. Perform Rigorous Calculation
+        new_elo_a, new_elo_b = calculate_new_ratings(
+            rating_a=brand_a.elo, matches_a=matches_a,
+            rating_b=brand_b.elo, matches_b=matches_b,
+            is_tie=match_data.is_tie
+        )
+
+        # 3. Deltas
+        diff_a = new_elo_a - brand_a.elo
+        diff_b = new_elo_b - brand_b.elo
+
+        # 4. Save History
         match_history = Match(
-            winner_id=winner.id,
-            loser_id=loser.id,
-            winner_elo_before=winner.elo,
-            winner_elo_after=new_winner_elo,
-            loser_elo_before=loser.elo,
-            loser_elo_after=new_loser_elo,
+            winner_id=brand_a.id,
+            loser_id=brand_b.id,
+            winner_elo_before=brand_a.elo,
+            winner_elo_after=new_elo_a,
+            loser_elo_before=brand_b.elo,
+            loser_elo_after=new_elo_b,
             location_country=match_data.location_country,
-            location_city=match_data.location_city
+            location_city=match_data.location_city,
+            is_tie=match_data.is_tie
         )
         self.session.add(match_history)
 
-        winner.elo = new_winner_elo
-        winner.wins += 1
-        winner.tier = get_tier_from_elo(new_winner_elo)
+        # 5. Update Stats
+        brand_a.elo = new_elo_a
+        brand_a.tier = get_tier_from_elo(new_elo_a)
         
-        loser.elo = new_loser_elo
-        loser.losses += 1
-        loser.tier = get_tier_from_elo(new_loser_elo)
+        brand_b.elo = new_elo_b
+        brand_b.tier = get_tier_from_elo(new_elo_b)
 
-        self.session.add(winner)
-        self.session.add(loser)
+        if match_data.is_tie:
+            brand_a.ties += 1
+            brand_b.ties += 1
+        else:
+            brand_a.wins += 1
+            brand_b.losses += 1
+
+        self.session.add(brand_a)
+        self.session.add(brand_b)
         self.session.commit()
         
         return MatchResult(
-            winner_id=winner.id,
-            winner_new_elo=winner.elo,
-            winner_elo_change=winner_diff,
-            loser_id=loser.id,
-            loser_new_elo=loser.elo,
-            loser_elo_change=loser_diff
+            winner_id=brand_a.id,
+            winner_new_elo=brand_a.elo,
+            winner_elo_change=diff_a,
+            loser_id=brand_b.id,
+            loser_new_elo=brand_b.elo,
+            loser_elo_change=diff_b
         )
