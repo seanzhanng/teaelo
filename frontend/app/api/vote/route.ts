@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
+import { fetchJson } from '@/lib/apiClient';
+import { MatchResult } from '@/lib/backendTypes';
+
+const API_BASE_URL = process.env.TEAELO_API_BASE_URL ?? 'http://127.0.0.1:8000';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { winnerId, loserId, isTie } = body;
+    const { winnerId, loserId, isTie, locationCountry, locationCity } = body;
 
     // Validate request
     if (!winnerId || !loserId) {
@@ -13,21 +17,40 @@ export async function POST(request: Request) {
       );
     }
 
-    // Stub: Log the vote (in production, this would update the database)
     if (isTie) {
-      console.log('Tie vote received:', { winnerId, loserId });
-    } else {
-      console.log('Vote received:', { winnerId, loserId });
+      return NextResponse.json(
+        { 
+          success: true,
+          message: 'Tie recorded client-side (no backend update yet)',
+          winnerId,
+          loserId,
+          isTie,
+        },
+        { status: 200 }
+      );
     }
 
-    // Return success response
+    const result = await fetchJson<MatchResult>(`${API_BASE_URL}/matches`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        winner_id: winnerId,
+        loser_id: loserId,
+        location_country: locationCountry,
+        location_city: locationCity,
+      }),
+    });
+
     return NextResponse.json(
       { 
         success: true,
-        message: isTie ? 'Tie recorded successfully' : 'Vote recorded successfully',
+        message: 'Vote recorded successfully',
         winnerId,
         loserId,
-        isTie,
+        isTie: false,
+        result,
       },
       { status: 200 }
     );

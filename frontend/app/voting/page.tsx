@@ -2,7 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import BrandCard from '@/components/BrandCard';
-import { brands as allBrands, type Brand as FullBrand } from '@/lib/mockData';
+import { UiBrand } from '@/lib/uiTypes';
+import { useRandomPair, useVoteMutation } from '@/lib/queries';
 
 interface Brand {
   id: string;
@@ -28,7 +29,7 @@ interface EmojiParticle {
 }
 
 // Convert full Brand schema to simplified Brand for display
-const convertBrand = (fullBrand: FullBrand): Brand => ({
+const convertBrand = (fullBrand: UiBrand): Brand => ({
   id: fullBrand.id,
   name: fullBrand.name,
   logo_url: fullBrand.logo_url,
@@ -80,23 +81,15 @@ const getUserCountry = async (): Promise<string | null> => {
   }
 };
 
-// Get random 2 brands for voting (client-side only)
-const getRandomBrands = (availableBrands: FullBrand[] = allBrands): Brand[] => {
-  const shuffled = [...availableBrands].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, 2).map(convertBrand);
-};
-
-// Use first 2 brands for SSR to avoid hydration mismatch
-const initialBrands: Brand[] = allBrands.slice(0, 2).map(convertBrand);
-
 const emojis = ['🧋', '💜', '⭐', '✨', '🎉', '💫', '🌟', '🥤'];
 
 export default function VotingPage() {
-  const [brands, setBrands] = useState<Brand[]>(initialBrands);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [isLocal, setIsLocal] = useState(true);
   const [userCountry, setUserCountry] = useState<string | null>(null);
   const [isDetectingLocation, setIsDetectingLocation] = useState(true);
   const [roundKey, setRoundKey] = useState(0);
+  const voteMutation = useVoteMutation();
 
   // Detect user's country on mount
   useEffect(() => {
@@ -106,32 +99,13 @@ export default function VotingPage() {
     });
   }, []);
 
-  // Filter brands based on local/international toggle
-  const getFilteredBrands = React.useCallback((): FullBrand[] => {
-    if (!isLocal || !userCountry) {
-      return allBrands; // Show all brands if international or country not detected
-    }
-    
-    // Filter brands that have user's country in their regions
-    return allBrands.filter((brand) => 
-      brand.metadata.regions.some((region) => 
-        region.toLowerCase() === userCountry.toLowerCase()
-      )
-    );
-  }, [isLocal, userCountry]);
+  const countryParam = isLocal ? userCountry ?? undefined : undefined;
+  const randomPairQuery = useRandomPair(countryParam);
 
-  // Get new random brands when filter changes
   useEffect(() => {
-    if (isDetectingLocation) return;
-    
-    const filtered = getFilteredBrands();
-    if (filtered.length >= 2) {
-      setBrands(getRandomBrands(filtered));
-    } else {
-      // If not enough local brands, show all brands
-      setBrands(getRandomBrands(allBrands));
-    }
-  }, [isLocal, userCountry, isDetectingLocation, getFilteredBrands]);
+    if (!randomPairQuery.data || randomPairQuery.data.length < 2) return;
+    setBrands(randomPairQuery.data.slice(0, 2).map(convertBrand));
+  }, [randomPairQuery.data]);
 
   const [isVoting, setIsVoting] = useState(false);
   const [votedBrandId, setVotedBrandId] = useState<string | null>(null);
@@ -240,20 +214,11 @@ export default function VotingPage() {
     }, 100);
 
     try {
-      const response = await fetch('/api/vote', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          winnerId,
-          loserId,
-        }),
+      const response = await voteMutation.mutateAsync({
+        winnerId,
+        loserId,
+        locationCountry: userCountry,
       });
-
-      if (!response.ok) {
-        throw new Error('Vote failed');
-      }
 
       // Placeholder: Update brands with new Elo, Rank, and Tier
       // In the future, this would come from the backend response
@@ -263,7 +228,9 @@ export default function VotingPage() {
             // Winner: Elo +8, rank might improve, tier might upgrade
             return {
               ...brand,
-              elo: brand.elo + 8,
+              elo: typeof response?.result === 'object' && response?.result
+                ? (response.result as any).winner_new_elo ?? brand.elo + 8
+                : brand.elo + 8,
               rank: Math.max(1, brand.rank - 1), // Improve rank (lower number is better)
               // Tier could upgrade if Elo crosses threshold (placeholder logic)
             };
@@ -271,7 +238,9 @@ export default function VotingPage() {
             // Loser: Elo -8, rank might worsen, tier might downgrade
             return {
               ...brand,
-              elo: brand.elo - 8,
+              elo: typeof response?.result === 'object' && response?.result
+                ? (response.result as any).loser_new_elo ?? brand.elo - 8
+                : brand.elo - 8,
               rank: brand.rank + 1, // Worsen rank
               // Tier could downgrade if Elo crosses threshold (placeholder logic)
             };
@@ -285,12 +254,7 @@ export default function VotingPage() {
       // After a delay, reset the vote state to allow new voting
       setTimeout(() => {
         setRoundKey((prev) => prev + 1);
-        const filtered = getFilteredBrands();
-        if (filtered.length >= 2) {
-          setBrands(getRandomBrands(filtered));
-        } else {
-          setBrands(getRandomBrands(allBrands));
-        }
+        randomPairQuery.refetch();
         setVotedBrandId(null);
         setRevealedBrandIds(new Set());
       }, 2000);
@@ -317,21 +281,12 @@ export default function VotingPage() {
     setVotedBrandId('tie'); // Use a special value to indicate tie
 
     try {
-      const response = await fetch('/api/vote', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          winnerId: brand1.id,
-          loserId: brand2.id,
-          isTie: true,
-        }),
+      await voteMutation.mutateAsync({
+        winnerId: brand1.id,
+        loserId: brand2.id,
+        isTie: true,
+        locationCountry: userCountry,
       });
-
-      if (!response.ok) {
-        throw new Error('Tie vote failed');
-      }
 
       // Update brands with tie Elo changes (smaller changes for ties)
       setBrands((prevBrands) => {
@@ -351,12 +306,7 @@ export default function VotingPage() {
       // After a delay, reset the vote state to allow new voting
       setTimeout(() => {
         setRoundKey((prev) => prev + 1);
-        const filtered = getFilteredBrands();
-        if (filtered.length >= 2) {
-          setBrands(getRandomBrands(filtered));
-        } else {
-          setBrands(getRandomBrands(allBrands));
-        }
+        randomPairQuery.refetch();
         setVotedBrandId(null);
         setRevealedBrandIds(new Set());
       }, 2000);
@@ -386,12 +336,7 @@ export default function VotingPage() {
     // After a shorter delay, reset the vote state to allow new voting
     setTimeout(() => {
       setRoundKey((prev) => prev + 1);
-      const filtered = getFilteredBrands();
-      if (filtered.length >= 2) {
-        setBrands(getRandomBrands(filtered));
-      } else {
-        setBrands(getRandomBrands(allBrands));
-      }
+      randomPairQuery.refetch();
       setVotedBrandId(null);
       setRevealedBrandIds(new Set());
       setIsVoting(false);
@@ -476,14 +421,14 @@ export default function VotingPage() {
               onClick={() => {
                 setIsLocal(!isLocal);
               }}
-              disabled={isDetectingLocation || getFilteredBrands().length < 2}
+              disabled={isDetectingLocation}
               className={`
                 relative w-16 h-8 sm:w-20 sm:h-9 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-milk-tea-dark focus:ring-offset-2
                 ${isLocal 
                   ? 'bg-milk-tea-medium' 
                   : 'bg-milk-tea-dark/20'
                 }
-                ${isDetectingLocation || getFilteredBrands().length < 2
+                ${isDetectingLocation
                   ? 'opacity-50 cursor-not-allowed'
                   : 'cursor-pointer hover:opacity-90 active:scale-95'
                 }

@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { brands, type Brand as FullBrand } from '@/lib/mockData';
 import { slugifyBrandName } from '@/lib/api';
+import { UiBrand } from '@/lib/uiTypes';
+import { useLeaderboard } from '@/lib/queries';
 
 interface Brand {
   id: string;
@@ -30,7 +31,7 @@ const tierColors: Record<Brand['tier'], string> = {
 };
 
 // Convert full Brand schema to simplified Brand for display
-const convertBrand = (fullBrand: FullBrand): Brand => ({
+const convertBrand = (fullBrand: UiBrand): Brand => ({
   id: fullBrand.id,
   name: fullBrand.name,
   logo_url: fullBrand.logo_url,
@@ -42,25 +43,78 @@ const convertBrand = (fullBrand: FullBrand): Brand => ({
   regions: fullBrand.metadata.regions,
 });
 
-// Get top 3 brands for podium
-const top3Brands: Brand[] = brands
-  .slice(0, 3)
-  .sort((a, b) => a.rank - b.rank)
-  .map(convertBrand);
-
-// Get remaining brands
-const remainingBrands: Brand[] = brands.slice(3).map(convertBrand);
-
 export default function RankingsPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-  const allBrands = [...top3Brands, ...remainingBrands];
-  const [filteredBrands, setFilteredBrands] = useState(allBrands);
+  const leaderboardQuery = useLeaderboard({ limit: 100 });
+
+  const allBrands = useMemo(() => {
+    const base = leaderboardQuery.data ?? [];
+    const sorted = [...base].sort((a, b) => b.elo - a.elo);
+    return sorted.map((brand, index) => ({
+      ...brand,
+      rank: brand.rank && brand.rank > 0 ? brand.rank : index + 1,
+    }));
+  }, [leaderboardQuery.data]);
+
+  const displayBrands = useMemo(() => allBrands.map(convertBrand), [allBrands]);
+  const [filteredBrands, setFilteredBrands] = useState<Brand[]>([]);
+
+  const top3Brands: Brand[] = displayBrands
+    .slice(0, 3)
+    .sort((a, b) => a.rank - b.rank);
+
+  const remainingBrands: Brand[] = displayBrands.slice(3);
+
+  useEffect(() => {
+    setFilteredBrands(displayBrands);
+  }, [displayBrands]);
+
+  if (leaderboardQuery.isLoading && displayBrands.length === 0) {
+    return (
+      <div className="h-full overflow-y-auto scrollbar-hide relative pt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center text-milk-tea-darker">
+          Loading leaderboard...
+        </div>
+      </div>
+    );
+  }
+
+  if (leaderboardQuery.error) {
+    return (
+      <div className="h-full overflow-y-auto scrollbar-hide relative pt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+          <p className="text-milk-tea-darker mb-2">Error loading leaderboard</p>
+          <p className="text-red-600 text-sm">
+            {leaderboardQuery.error instanceof Error 
+              ? leaderboardQuery.error.message 
+              : 'Failed to fetch leaderboard data'}
+          </p>
+          <p className="text-milk-tea-dark text-xs mt-4">
+            Make sure your backend is running at http://127.0.0.1:8000
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (displayBrands.length === 0) {
+    return (
+      <div className="h-full overflow-y-auto scrollbar-hide relative pt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center text-milk-tea-darker">
+          <p>No leaderboard data available yet.</p>
+          <p className="text-sm text-milk-tea-dark mt-2">
+            Database may need seeding. Run: python backend/seed.py
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     const lowerQuery = query.toLowerCase();
-    const filtered = allBrands.filter(
+    const filtered = displayBrands.filter(
       (brand) =>
         brand.name.toLowerCase().includes(lowerQuery) ||
         brand.country_of_origin.toLowerCase().includes(lowerQuery) ||
@@ -93,8 +147,10 @@ export default function RankingsPage() {
       </div>
       
         {/* Podium for Top 3 */}
+        {top3Brands.length >= 2 && (
         <div className="flex flex-col sm:flex-row items-center sm:items-end justify-center gap-4 sm:gap-3 md:gap-6 mb-8 sm:mb-12 md:mb-16 relative z-20">
           {/* 2nd Place */}
+          {top3Brands.length >= 2 && (
           <Link href={`/brand/${slugifyBrandName(top3Brands[1].name)}`} className="flex flex-col items-center animate-fade-in-scale animate-delay-200 cursor-pointer group order-2 sm:order-1">
             <div className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-3 sm:p-4 md:p-6 shadow-lg mb-2 sm:mb-4 w-32 sm:w-40 md:w-52 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl">
               <div className="flex justify-center mb-2 sm:mb-3">
@@ -131,6 +187,7 @@ export default function RankingsPage() {
               <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-milk-tea-darker">2</span>
             </div>
           </Link>
+          )}
 
               {/* 1st Place */}
               <Link href={`/brand/${slugifyBrandName(top3Brands[0].name)}`} className="flex flex-col items-center animate-fade-in-scale animate-delay-100 cursor-pointer group order-1 sm:order-2">
@@ -171,6 +228,7 @@ export default function RankingsPage() {
           </Link>
 
               {/* 3rd Place */}
+              {top3Brands.length >= 3 && (
               <Link href={`/brand/${slugifyBrandName(top3Brands[2].name)}`} className="flex flex-col items-center animate-fade-in-scale animate-delay-300 cursor-pointer group order-3">
             <div className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-3 sm:p-4 md:p-6 shadow-lg mb-2 sm:mb-4 w-32 sm:w-40 md:w-52 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl">
               <div className="flex justify-center mb-2 sm:mb-3">
@@ -207,9 +265,12 @@ export default function RankingsPage() {
               <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-milk-tea-darker">3</span>
             </div>
           </Link>
+          )}
         </div>
+        )}
 
-        {/* Animated Arrow */}
+        {/* Animated Arrow - only show if there are more brands beyond the podium */}
+        {displayBrands.length > 3 && (
         <div className="flex justify-center mb-8 relative z-20 animate-fade-in-up animate-delay-400">
           <button
             onClick={scrollToResults}
@@ -231,6 +292,7 @@ export default function RankingsPage() {
             </svg>
           </button>
         </div>
+        )}
       </div>
 
           {/* Results Section */}

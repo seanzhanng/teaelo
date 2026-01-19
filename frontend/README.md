@@ -2,6 +2,14 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+### Backend API
+
+Set the backend base URL for local development:
+
+```bash
+export TEAELO_API_BASE_URL="http://127.0.0.1:8000"
+```
+
 First, run the development server:
 
 ```bash

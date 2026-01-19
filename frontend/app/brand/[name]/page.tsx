@@ -1,27 +1,47 @@
 import { notFound } from 'next/navigation';
-import { getBrandByName, getAllBrands, slugifyBrandName } from '@/lib/api';
+import { slugifyBrandName } from '@/lib/api';
 import BrandCardDisplay from '@/components/BrandCardDisplay';
+import { BackendBrand } from '@/lib/backendTypes';
+import { mapBackendBrandToUiBrand } from '@/lib/brandMapper';
+import { UiBrand } from '@/lib/uiTypes';
+
+export const dynamic = 'force-dynamic';
 
 interface PageProps {
   params: Promise<{ name: string }>;
 }
 
-export async function generateStaticParams() {
-  const brands = getAllBrands();
-  return brands.map((brand) => ({
-    name: slugifyBrandName(brand.name),
-  }));
-}
+const API_BASE_URL = process.env.TEAELO_API_BASE_URL ?? 'http://127.0.0.1:8000';
+
+const fetchBrands = async (): Promise<UiBrand[]> => {
+  const response = await fetch(`${API_BASE_URL}/brands?limit=200`, {
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    return [];
+  }
+
+  const data = (await response.json()) as BackendBrand[];
+  return data.map(mapBackendBrandToUiBrand);
+};
+
+const getBrandBySlug = async (slug: string): Promise<UiBrand | null> => {
+  const brands = await fetchBrands();
+  return brands.find((brand) => slugifyBrandName(brand.name) === slug) ?? null;
+};
 
 export default async function BrandPage({ params }: PageProps) {
   const { name } = await params;
-  const brand = getBrandByName(name);
+  const brand = await getBrandBySlug(name);
 
   if (!brand) {
     notFound();
   }
 
-  const priceDisplay = '$'.repeat(brand.metadata.price_category);
+  const priceDisplay = brand.metadata.price_category
+    ? '$'.repeat(brand.metadata.price_category)
+    : '-';
 
   // Convert full Brand schema to simplified Brand for BrandCardDisplay
   const brandCardData = {
