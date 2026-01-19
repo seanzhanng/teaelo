@@ -7,6 +7,7 @@ class MatchCreate(BaseModel):
     loser_id: uuid.UUID
     location_country: Optional[str] = None
     location_city: Optional[str] = None
+    is_tie: bool = False
 
 class MatchResult(BaseModel):
     winner_id: uuid.UUID
