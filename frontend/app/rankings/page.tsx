@@ -17,7 +17,6 @@ interface Brand {
   tier: 'S' | 'A' | 'B' | 'C' | 'D' | 'F';
   rank: number;
   established_date?: string;
-  price?: 1 | 2 | 3 | 4;
   regions: string[];
 }
 
@@ -39,7 +38,6 @@ const convertBrand = (fullBrand: UiBrand): Brand => ({
   elo: fullBrand.elo,
   tier: fullBrand.tier,
   rank: fullBrand.rank,
-  price: fullBrand.metadata.price_category,
   regions: fullBrand.metadata.regions,
 });
 
@@ -121,8 +119,7 @@ export default function RankingsPage() {
         brand.regions.some((region) => region.toLowerCase().includes(lowerQuery)) ||
         brand.tier.toLowerCase().includes(lowerQuery) ||
         Math.round(brand.elo).toString().includes(lowerQuery) ||
-        brand.rank.toString().includes(lowerQuery) ||
-        (brand.price && '$'.repeat(brand.price).toLowerCase().includes(lowerQuery))
+        brand.rank.toString().includes(lowerQuery)
     );
     setFilteredBrands(filtered);
   };
@@ -321,7 +318,6 @@ export default function RankingsPage() {
                   <th className="px-2 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 text-left text-xs sm:text-sm font-semibold text-milk-tea-darker">Tier</th>
                   <th className="px-2 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 text-left text-xs sm:text-sm font-semibold text-milk-tea-darker">Elo</th>
                   <th className="px-2 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 text-left text-xs sm:text-sm font-semibold text-milk-tea-darker hidden sm:table-cell">Origin</th>
-                  <th className="px-2 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 text-left text-xs sm:text-sm font-semibold text-milk-tea-darker">Price</th>
                   <th className="px-2 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 text-left text-xs sm:text-sm font-semibold text-milk-tea-darker hidden md:table-cell">Regions</th>
                 </tr>
               </thead>
@@ -362,9 +358,6 @@ export default function RankingsPage() {
                     </td>
                     <td className="px-2 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 text-xs sm:text-sm md:text-base text-milk-tea-darker font-semibold">{Math.round(brand.elo)}</td>
                     <td className="px-2 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 text-xs sm:text-sm md:text-base text-milk-tea-dark hidden sm:table-cell">{brand.country_of_origin}</td>
-                    <td className="px-2 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 text-xs sm:text-sm md:text-base text-milk-tea-dark">
-                      {brand.price ? '$'.repeat(brand.price) : '-'}
-                    </td>
                     <td className="px-2 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 hidden md:table-cell">
                       <div className="flex flex-wrap gap-1">
                         {brand.regions.slice(0, 2).map((region) => (

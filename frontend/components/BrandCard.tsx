@@ -12,7 +12,6 @@ interface Brand {
   tier: 'S' | 'A' | 'B' | 'C' | 'D' | 'F';
   rank: number;
   established_date?: string;
-  price?: 1 | 2 | 3 | 4; // $ to $$$$
 }
 
 interface BrandCardProps {
@@ -240,15 +239,6 @@ export default function BrandCard({ brand, onClick, disabled = false, isRevealed
       <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-center mb-1 sm:mb-2 relative z-20" style={{ color: 'var(--milk-tea-darker)' }}>
         {brand.name}
       </h3>
-
-      {/* Price Indicator */}
-      {brand.price && (
-        <div className="flex justify-center mb-1.5 sm:mb-2 md:mb-3 lg:mb-4 relative z-20">
-          <div className="text-milk-tea-dark font-semibold text-sm sm:text-base md:text-lg lg:text-xl">
-            {'$'.repeat(brand.price)}
-          </div>
-        </div>
-      )}
 
       {/* Tier Badge */}
       <div className="flex justify-center mb-1.5 sm:mb-2 md:mb-3 lg:mb-4 relative z-20">

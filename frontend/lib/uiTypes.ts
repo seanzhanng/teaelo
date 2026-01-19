@@ -13,12 +13,7 @@ export interface UiBrand {
     losses: number;
     ties: number;
   };
-  trends: {
-    elo_trend: number;
-    rank_trend: number;
-  };
   metadata: {
-    price_category?: 1 | 2 | 3 | 4;
     total_locations: number;
     regions: string[];
   };

@@ -2,13 +2,16 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { fetchJson } from './apiClient';
 import { UiBrand } from './uiTypes';
 
-export const useRandomPair = (country?: string) => {
+export const useRandomPair = (country?: string, enabled: boolean = true) => {
   return useQuery({
     queryKey: ['brands', 'random', country],
     queryFn: async () => {
       const url = country ? `/api/brands/random?country=${encodeURIComponent(country)}` : '/api/brands/random';
       return fetchJson<UiBrand[]>(url);
     },
+    enabled, // Only run query when enabled (prevents double fetch during location detection)
+    refetchOnWindowFocus: false, // Don't refresh cards when user switches back to tab
+    staleTime: Infinity, // Keep the same random pair until explicitly refetched
   });
 };
 

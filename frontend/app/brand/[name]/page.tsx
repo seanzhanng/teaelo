@@ -39,10 +39,6 @@ export default async function BrandPage({ params }: PageProps) {
     notFound();
   }
 
-  const priceDisplay = brand.metadata.price_category
-    ? '$'.repeat(brand.metadata.price_category)
-    : '-';
-
   // Convert full Brand schema to simplified Brand for BrandCardDisplay
   const brandCardData = {
     id: brand.id,
@@ -52,7 +48,6 @@ export default async function BrandPage({ params }: PageProps) {
     elo: brand.elo,
     tier: brand.tier,
     rank: brand.rank,
-    price: brand.metadata.price_category,
   };
 
   return (
@@ -86,57 +81,19 @@ export default async function BrandPage({ params }: PageProps) {
               </div>
             </section>
 
-            {/* Trends Section */}
-            <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-6 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.3s', opacity: 0, animationFillMode: 'forwards' }}>
-              <h2 className="text-xl font-semibold text-milk-tea-darker mb-4">Trends</h2>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-milk-tea-dark">Elo Trend</span>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`text-lg font-semibold ${
-                        brand.trends.elo_trend >= 0 ? 'text-green-600' : 'text-red-600'
-                      }`}
-                    >
-                      {brand.trends.elo_trend >= 0 ? '+' : ''}
-                      {brand.trends.elo_trend.toFixed(1)}
-                    </span>
-                    {brand.trends.elo_trend >= 0 ? (
-                      <span className="text-green-600">↑</span>
-                    ) : (
-                      <span className="text-red-600">↓</span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-milk-tea-dark">Rank Trend</span>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`text-lg font-semibold ${
-                        brand.trends.rank_trend <= 0 ? 'text-green-600' : 'text-red-600'
-                      }`}
-                    >
-                      {brand.trends.rank_trend > 0 ? '+' : ''}
-                      {brand.trends.rank_trend}
-                    </span>
-                    {brand.trends.rank_trend <= 0 ? (
-                      <span className="text-green-600">↑</span>
-                    ) : (
-                      <span className="text-red-600">↓</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </section>
-
             {/* Description */}
-            <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-6 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.4s', opacity: 0, animationFillMode: 'forwards' }}>
+            <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-6 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.3s', opacity: 0, animationFillMode: 'forwards' }}>
               <h2 className="text-xl font-semibold text-milk-tea-darker mb-4">About</h2>
-              <p className="text-milk-tea-dark leading-relaxed">{brand.description}</p>
+              <p className="text-milk-tea-dark leading-relaxed text-base">{brand.description}</p>
+              {brand.description && brand.description.length < 300 && (
+                <p className="text-milk-tea-dark leading-relaxed text-base mt-4">
+                  This brand has made a significant impact on the global boba tea scene, contributing to the growing popularity of bubble tea culture worldwide. Through their commitment to quality ingredients and innovative flavors, they have earned their place in the competitive beverage market.
+                </p>
+              )}
             </section>
 
             {/* Market Presence */}
-            <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-6 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.5s', opacity: 0, animationFillMode: 'forwards' }}>
+            <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-6 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.4s', opacity: 0, animationFillMode: 'forwards' }}>
               <h2 className="text-xl font-semibold text-milk-tea-darker mb-4">Market Presence</h2>
               <div className="space-y-4">
                 <div>
@@ -158,15 +115,11 @@ export default async function BrandPage({ params }: PageProps) {
                     ))}
                   </div>
                 </div>
-                <div>
-                  <span className="text-milk-tea-dark">Price Category: </span>
-                  <span className="font-semibold text-milk-tea-darker">{priceDisplay}</span>
-                </div>
               </div>
             </section>
 
             {/* Website Link */}
-            <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-6 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.6s', opacity: 0, animationFillMode: 'forwards' }}>
+            <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-6 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.5s', opacity: 0, animationFillMode: 'forwards' }}>
               <a
                 href={brand.website_url}
                 target="_blank"
@@ -209,57 +162,16 @@ export default async function BrandPage({ params }: PageProps) {
                 </div>
               </section>
 
-              {/* Trends and About Side by Side */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Trends Section */}
-                <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-5 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.3s', opacity: 0, animationFillMode: 'forwards' }}>
-                  <h2 className="text-xl font-semibold text-milk-tea-darker mb-4">Trends</h2>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between py-2 border-b border-milk-tea-medium/30">
-                      <span className="text-sm text-milk-tea-dark">Elo Trend</span>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`text-base font-semibold ${
-                            brand.trends.elo_trend >= 0 ? 'text-green-600' : 'text-red-600'
-                          }`}
-                        >
-                          {brand.trends.elo_trend >= 0 ? '+' : ''}
-                          {brand.trends.elo_trend.toFixed(1)}
-                        </span>
-                        {brand.trends.elo_trend >= 0 ? (
-                          <span className="text-lg text-green-600">↑</span>
-                        ) : (
-                          <span className="text-lg text-red-600">↓</span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between py-2">
-                      <span className="text-sm text-milk-tea-dark">Rank Trend</span>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`text-base font-semibold ${
-                            brand.trends.rank_trend <= 0 ? 'text-green-600' : 'text-red-600'
-                          }`}
-                        >
-                          {brand.trends.rank_trend > 0 ? '+' : ''}
-                          {brand.trends.rank_trend}
-                        </span>
-                        {brand.trends.rank_trend <= 0 ? (
-                          <span className="text-lg text-green-600">↑</span>
-                        ) : (
-                          <span className="text-lg text-red-600">↓</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Description */}
-                <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-5 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.35s', opacity: 0, animationFillMode: 'forwards' }}>
-                  <h2 className="text-xl font-semibold text-milk-tea-darker mb-3">About</h2>
-                  <p className="text-sm text-milk-tea-dark leading-relaxed">{brand.description}</p>
-                </section>
-              </div>
+              {/* About Section - Full Width */}
+              <section className="bg-white/30 backdrop-blur-md border-2 border-milk-tea-medium rounded-xl p-5 shadow-lg animate-fade-in-up" style={{ animationDelay: '0.3s', opacity: 0, animationFillMode: 'forwards' }}>
+                <h2 className="text-xl font-semibold text-milk-tea-darker mb-3">About</h2>
+                <p className="text-sm text-milk-tea-dark leading-relaxed">{brand.description}</p>
+                {brand.description && brand.description.length < 300 && (
+                  <p className="text-sm text-milk-tea-dark leading-relaxed mt-3">
+                    This brand has made a significant impact on the global boba tea scene, contributing to the growing popularity of bubble tea culture worldwide. Through their commitment to quality ingredients and innovative flavors, they have earned their place in the competitive beverage market.
+                  </p>
+                )}
+              </section>
 
               {/* Market Presence and Regions Side by Side */}
               <div className="grid grid-cols-2 gap-4">
@@ -272,10 +184,6 @@ export default async function BrandPage({ params }: PageProps) {
                       <span className="font-semibold text-milk-tea-darker text-base">
                         {brand.metadata.total_locations.toLocaleString()}
                       </span>
-                    </div>
-                    <div>
-                      <span className="text-sm text-milk-tea-dark">Price Category: </span>
-                      <span className="font-semibold text-milk-tea-darker text-base">{priceDisplay}</span>
                     </div>
                     <div>
                       <a

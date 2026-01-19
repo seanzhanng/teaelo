@@ -10,7 +10,6 @@ interface BrandCardDisplayProps {
   elo: number;
   tier: 'S' | 'A' | 'B' | 'C' | 'D' | 'F';
   rank: number;
-  price?: 1 | 2 | 3 | 4;
 }
 
 export default function BrandCardDisplay(props: BrandCardDisplayProps) {

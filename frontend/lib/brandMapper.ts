@@ -22,12 +22,7 @@ export const mapBackendBrandToUiBrand = (brand: BackendBrand): UiBrand => {
       losses: brand.losses ?? 0,
       ties: brand.ties ?? 0,
     },
-    trends: {
-      elo_trend: brand.elo_trend ?? 0,
-      rank_trend: brand.rank_trend ?? 0,
-    },
     metadata: {
-      price_category: undefined,
       total_locations: brand.total_locations ?? 0,
       regions: brand.regions_present ?? [],
     },

@@ -14,7 +14,6 @@ interface Brand {
   tier: 'S' | 'A' | 'B' | 'C' | 'D' | 'F';
   rank: number;
   established_date?: string;
-  price?: 1 | 2 | 3 | 4; // $ to $$$$
 }
 
 interface EmojiParticle {
@@ -37,7 +36,6 @@ const convertBrand = (fullBrand: UiBrand): Brand => ({
   elo: fullBrand.elo,
   tier: fullBrand.tier,
   rank: fullBrand.rank,
-  price: fullBrand.metadata.price_category,
 });
 
 // Map common country names to match region names in brand data
@@ -99,12 +97,19 @@ export default function VotingPage() {
     });
   }, []);
 
+  // Only use country param after location detection is complete to avoid double fetch
   const countryParam = isLocal ? userCountry ?? undefined : undefined;
-  const randomPairQuery = useRandomPair(countryParam);
+  const randomPairQuery = useRandomPair(countryParam, !isDetectingLocation);
 
   useEffect(() => {
     if (!randomPairQuery.data || randomPairQuery.data.length < 2) return;
-    setBrands(randomPairQuery.data.slice(0, 2).map(convertBrand));
+    const newBrands = randomPairQuery.data.slice(0, 2).map(convertBrand);
+    // Only update if brand IDs have actually changed (prevents double refresh)
+    const newIds = newBrands.map(b => b.id).sort().join(',');
+    if (previousBrandIdsRef.current !== newIds) {
+      previousBrandIdsRef.current = newIds;
+      setBrands(newBrands);
+    }
   }, [randomPairQuery.data]);
 
   const [isVoting, setIsVoting] = useState(false);
@@ -114,6 +119,7 @@ export default function VotingPage() {
   const animationFrameRef = useRef<number | undefined>(undefined);
   const particlesRef = useRef<EmojiParticle[]>([]);
   const cardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const previousBrandIdsRef = useRef<string>('');
 
   // Update particles ref when particles state changes
   useEffect(() => {
