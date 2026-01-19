@@ -6,9 +6,14 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: '**', // Allows all HTTPS domains
-        // Note: This is safe since image URLs come from controlled mockData, not user input
+      },
+      {
+        protocol: 'http',
+        hostname: '**', // Allows all HTTP domains (for some logos that may use http)
       },
     ],
+    // Allow all image sources (accept from anywhere)
+    unoptimized: false,
   },
 };
 
